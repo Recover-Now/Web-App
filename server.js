@@ -12,10 +12,9 @@ var web;
 (function () {
     //Load templates
     var templates = {};
-    fs.readdir(__dirname + '\\templates', function (err, items) {
-        if (err) {
-            return console.trace(err);
-        }
+    var loadTemplates = function () {
+        var items = fs.readdirSync(__dirname + '/templates');
+
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
             var spl = item.split('.');
@@ -23,9 +22,10 @@ var web;
             for (var j = 1; j < spl.length - 1; j++) {
                 bld += '.' + spl[j];
             }
-            templates['%' + bld.toUpperCase() + '%'] = fs.readFileSync(__dirname + '\\templates\\' + item, 'utf8');
+            templates['%' + bld.toUpperCase() + '%'] = fs.readFileSync(__dirname + '/templates/' + item, 'utf8');
         }
-    });
+    };
+    loadTemplates();
 
     var app = require('express')();
     var http = require('http').Server(app);
@@ -63,6 +63,10 @@ var web;
 
         var url = req.url.split('?')[0];
         if (url === '/')url += 'index.html';
+
+        if (config.forceReloadTemplates) {
+            loadTemplates();
+        }
 
         sess.verifySession(session.ourId, function (uid) {
             if (!uid && needAuth.indexOf(url) >= 0) {
