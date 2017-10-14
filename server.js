@@ -33,6 +33,7 @@ var web;
     var bodyParser = require('body-parser');
     var session = require('express-session');
     var formidable = require('formidable');
+    var mime = require('mime');
 
     //Setup middleware
     app.use(bodyParser.urlencoded({extended: true}));
@@ -94,13 +95,16 @@ var web;
                 }
 
                 var sendData = function (dat) {
-                    if (url.endsWith('.html') && false) {
+                    if (url.endsWith('.html')) {
                         var keys = Object.keys(templates);
                         for (var i = 0; i < keys.length; i++) {
                             dat = dat.replace(new RegExp(keys[i], 'g'), templates[keys[i]]);
                         }
+                        res.setHeader('Content-Type', mime.lookup(path));
+                        res.send(dat);
+                    } else {
+                        res.sendFile(path);
                     }
-                    res.send(dat);
                 };
 
                 if (replace[url]) {

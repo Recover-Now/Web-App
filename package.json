@@ -21,7 +21,8 @@
     "firebase-admin": "^4.0.3",
     "formidable": "^1.1.1",
     "gcloud": "^0.37.2",
-    "socket.io": "^2.0.3"
+    "socket.io": "^2.0.3",
+    "mime": "latest"
   },
   "bugs": {
     "url": "https://github.com/Recover-Now/Web-App/issues"
