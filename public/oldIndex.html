@@ -1,0 +1,63 @@
+<html>
+<head>
+    <title>Woo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+        .msg {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<div class="msg"></div>
+<div id="login">
+    <form action="/login" method="post">
+        <input type="text" name="email" placeholder="Email"/><br>
+        <input type="password" name="password" placeholder="Password"/><br>
+        <input type="submit" value="Login"/>
+    </form>
+</div>
+<br><br>
+<div id="register">
+    <form action="/register" method="post">
+        <input type="text" name="fname" placeholder="First Name"/>&nbsp;
+        <input type="text" name="lname" placeholder="Last Name"/><br>
+        <input type="text" name="email" placeholder="Email"/><br>
+        <input type="text" name="phone" placeholder="Phone Number"/><br>
+        <input type="password" class="pass" name="password" placeholder="Password"/><br>
+        <input type="password" class="cpass" placeholder="Confirm Password"/><br>
+        <input type="button" class="btn" value="Register"/>
+    </form>
+</div>
+
+<script>
+    function findGetParameter(parameterName) {
+        var result = null,
+                tmp = [];
+        location.search
+                .substr(1)
+                .split("&")
+                .forEach(function (item) {
+                    tmp = item.split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                });
+        return result;
+    }
+    var msg = findGetParameter('msg');
+    if (msg) {
+        $('.msg').html(msg);
+    }
+
+    var $register = $('#register');
+
+    $register.find('.btn').click(function () {
+        var pass = $register.find('.pass').val();
+        var cpass = $register.find('.cpass').val();
+        if (pass != cpass) {
+            return alert('Boi u wrong aboot what? YOUR PASSSS IS NOT MATCH');
+        }
+        $register.find('form').submit();
+    });
+</script>
+</body>
+</html>
