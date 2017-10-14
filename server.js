@@ -215,7 +215,7 @@ var web;
 
         recover.getHeatmapData(function (array) {
             socket.emit('heatmapData', array);
-        })
+        });
     });
 
     web = {
@@ -463,14 +463,39 @@ var recover;
 
 /*
 for (var i = 0; i < 5; i++) {
-    test.addResourceToCity('USA-GA-Atlanta', {
-        title: 'TITLE_' + lib.randomString(5),
-        content: 'CONTENT_' + lib.randomString(5),
-        poster: 'POSTER_' + lib.randomString(10),
-        category: Math.floor(Math.random() * 5)
-    });
+    recover.addResource('POSTER_' + lib.randomString(10),
+        'US-GA-Atlanta',
+        'TITLE_' + lib.randomString(5),
+        'CONTENT_' + lib.randomString(5),
+        Math.floor(Math.random() * 5));
+    recover.addRecoveryArea('POSTER_' + lib.randomString(10),
+        'US-GA-Atlanta',
+        'TITLE_' + lib.randomString(5),
+        'CONTENT_' + lib.randomString(5));
 }
 */
+/*
+for (var i = 0; i < 900; i++) {
+    fb.getUniqueKey(28, config.firebase.userPath, function (uid) {
+        fb.ref(config.firebase.userPath + uid).set({
+            email: 'boi@boi.boi',
+            firstName: 'boi',
+            lastName: 'boi',
+            helpRequest: 0,
+            phoneNumber: '123456790'
+        });
+    });
+}*/
+
+fb.ref(config.firebase.userPath).once('value', function (snap) {
+    var users = snap.val();
+    var userIds = Object.keys(users);
+    for (var i = 0; i < userIds.length; i++) {
+        var lat = 33 - Math.pow(Math.random()*2-1, 3);
+        var lon = -84 + Math.pow(Math.random()*2-1, 3);
+        recover.updateHelpRequest(userIds[i], lat, lon);
+    }
+});
 
 //Start web
 web.start();

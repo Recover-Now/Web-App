@@ -2,14 +2,13 @@ var socket = io();
 
 socket.on('heatmapData', function (array) {
     console.log(array);
-          var hmdata = [];
-          for(var i = 0; i < array.length; i++)
-          {
-          hmdata.push( new google.maps.LatLng(array.latitude, array.longitude));
-          }
-          heatmap = new google.maps.visualization.HeatmapLayer({                                                                data: hmData
-       });
-          heatmap.setMap(map);
+    var hmdata = [];
+    for (var i = 0; i < array.length; i++) {
+        hmdata.push(new google.maps.LatLng(array[i].latitude, array[i].longitude));
+    }
+
+    var newdata = new google.maps.MVCArray(hmdata);
+    heatmap.set('data', newdata);
 });
 
 var heatmap;
@@ -23,6 +22,8 @@ function initMap() {
         mapTypeId: 'satellite'
     });
 
-   
- //   heatmap.setMap(map);
+    heatmap = new google.maps.visualization.HeatmapLayer({
+        data: []
+    });
+    heatmap.setMap(map);
 }
