@@ -29,6 +29,17 @@ var web;
 
     var needAuth = ['/dashboard.html'];
 
+    app.get('/profilepic', function (req, res) {
+        var email = req.query.email;
+        fb.emailToUser(email, function (data) {
+            if (data.err) {
+                res.send('Invalid email');
+            } else {
+                fb.getFileStream(config.firebase.userPath + data.uid).pipe(res);
+            }
+        });
+    });
+
     app.get('*', function (req, res) {
         var session = req.session;
 
@@ -122,8 +133,8 @@ var web;
                 if (data.err) {
                     return resolve(data.err.message);
                 } else {
-                    fb.uploadFile(config.firebase.userPath + data.uid, profilePic, function (data) {
-                        if (data.err) {
+                    fb.uploadFile(config.firebase.userPath + data.uid, profilePic, function (dat) {
+                        if (dat.err) {
                             return resolve('Could not upload profile pic');
                         } else {
                             fb.ref(config.firebase.userPath + data.uid).set({
@@ -284,6 +295,13 @@ var fb;
     });
     var bucket = storage.bucket('recover-now.appspot.com');
 
+    var formatFilePath = function (path) {
+        if (path.startsWith('/')) {
+            path = path.substring(1);
+        }
+        return path;
+    };
+
     fb = {
         register: function (email, pass, callback) {
             firebase.auth().createUser({
@@ -308,7 +326,7 @@ var fb;
             return firebase.database().ref(path);
         },
         uploadFile: function (path, file, callback) {
-            console.log('boi', file);
+            path = formatFilePath(path);
             return bucket.upload(file.path, {destination: path}, function (err, file, apiResponse) {
                 if (err) {
                     console.trace(err);
@@ -316,6 +334,17 @@ var fb;
                 }
                 callback({success: true});
             });
+        },
+        getFileStream: function (path) {
+            path = formatFilePath(path);
+            return bucket.file(path).createReadStream();
+        },
+        emailToUser: function (email, callback) {
+            firebase.auth().getUserByEmail(email).then(function (data) {
+                callback({uid: data.uid});
+            }, function (err) {
+                callback({err: err.errorInfo});
+            })
         }
     };
 
@@ -333,6 +362,13 @@ var test;
             var dat = {};
             dat[resourceId] = true;
             fb.ref(config.firebase.locationPath + cityId + '/resources').update(dat);
+        },
+        addRecoveryToCity: function (cityId, recoveryData) {
+            var recoveryId = lib.randomString(20);
+            fb.ref(config.firebase.recoveryPath + recoveryId).set(recoveryData);
+            var dat = {};
+            dat[recoveryId] = true;
+            fb.ref(config.firebase.locationPath + cityId + '/recoveryAreas').update(dat);
         }
     };
 })();

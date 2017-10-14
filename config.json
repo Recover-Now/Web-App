@@ -5,6 +5,7 @@
     "sessionPath": "/RNSession/",
     "userPath": "/RNUser/",
     "resourcePath": "/RNResource/",
+    "recoveryPath": "/RNRecoveryArea/",
     "locationPath": "/RNLocation/"
   }
 }
