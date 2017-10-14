@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+        .inf {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<form action="/logout" method="post">
+    <input type="submit" value="Logout"/>
+</form><br>
+First Name: <span class="inf firstname"></span><br>
+Last Name: <span class="inf lastname"></span><br>
+Email: <span class="inf email"></span><br>
+Phone: <span class="inf phone"></span><br>
+<script>
+    var serverData = '%SERVERDATA%';
+    if (serverData.toLowerCase() != '%serverdata%') {
+        serverData = JSON.parse(serverData);
+        $('.firstname').html(serverData.firstName);
+        $('.lastname').html(serverData.lastName);
+        $('.email').html(serverData.email);
+        $('.phone').html(serverData.phoneNumber);
+    }
+</script>
+</body>
+</html>
