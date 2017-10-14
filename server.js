@@ -15,6 +15,7 @@ var web;
     var io = require('socket.io')(http);
     var bodyParser = require('body-parser');
     var session = require('express-session');
+    var formidable = require('formidable');
 
     //Setup middleware
     app.use(bodyParser.urlencoded({extended: true}));
@@ -61,7 +62,7 @@ var web;
 
             fs.readFile(path, 'utf8', function (err, data) {
                 if (err) {
-                    return console.log(err);
+                    return console.trace(err);
                 }
 
                 if (replace[url]) {
@@ -76,48 +77,66 @@ var web;
     });
 
     app.post('/register', function (req, res) {
-        var firstName = req.body.fname;
-        var lastName = req.body.lname;
-        var email = req.body.email;
-        var phone = req.body.phone;
-        var pass = req.body.password;
-
-        var resolve = function (msg) {
-            res.redirect('/index.html?msg=' + msg);
-        };
-
-        if (!firstName || firstName.length == 0) {
-            return resolve('First name cannot be left blank');
-        }
-
-        if (!lastName || lastName.length == 0) {
-            return resolve('Last name cannot be left blank');
-        }
-
-        if (!email || email.length == 0) {
-            return resolve('Email cannot be left blank');
-        }
-
-        if (!phone || phone.length == 0) {
-            return resolve('Phone number cannot be left blank');
-        }
-
-        if (!pass || pass.length < 6) {
-            return resolve('Invalid password');
-        }
-
-        fb.register(email, pass, function (data) {
-            if (data.err) {
-                return resolve(data.err.message);
-            } else {
-                fb.ref(config.firebase.userPath + data.uid).set({
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    phoneNumber: phone
-                });
-                return resolve('Registration success! Please login');
+        var form = new formidable.IncomingForm();
+        form.parse(req, function (err, fields, files) {
+            if (err) {
+                console.trace(err);
+                return res.redirect('/index.html?msg=An error has occurred');
             }
+            var firstName = fields.fname;
+            var lastName = fields.lname;
+            var email = fields.email;
+            var phone = fields.phone;
+            var pass = fields.password;
+            var profilePic = files.profilePic;
+
+            var resolve = function (msg) {
+                res.redirect('/index.html?msg=' + msg);
+            };
+
+            if (!firstName || firstName.length == 0) {
+                return resolve('First name cannot be left blank');
+            }
+
+            if (!lastName || lastName.length == 0) {
+                return resolve('Last name cannot be left blank');
+            }
+
+            if (!email || email.length == 0) {
+                return resolve('Email cannot be left blank');
+            }
+
+            if (!phone || phone.length == 0) {
+                return resolve('Phone number cannot be left blank');
+            }
+
+            if (!pass || pass.length < 6) {
+                return resolve('Invalid password');
+            }
+
+            if (!profilePic) {
+                return resolve('Invalid profile picture');
+            }
+
+            fb.register(email, pass, function (data) {
+                if (data.err) {
+                    return resolve(data.err.message);
+                } else {
+                    fb.uploadFile(config.firebase.userPath + data.uid, profilePic, function (data) {
+                        if (data.err) {
+                            return resolve('Could not upload profile pic');
+                        } else {
+                            fb.ref(config.firebase.userPath + data.uid).set({
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email,
+                                phoneNumber: phone
+                            });
+                            return resolve('Registration success! Please login');
+                        }
+                    });
+                }
+            });
         });
     });
 
@@ -244,7 +263,8 @@ var fb;
 
     firebase.initializeApp({
         credential: firebase.credential.cert(serviceAccount),
-        databaseURL: "https://recover-now.firebaseio.com"
+        databaseURL: "https://recover-now.firebaseio.com",
+        storageBucket: "recover-now.appspot.com"
     });
 
     var client = require('firebase');
@@ -257,6 +277,13 @@ var fb;
         messagingSenderId: "828997879070"
     });
 
+    var gcloud = require('gcloud');
+    var storage = gcloud.storage({
+        projectId: 'recover-now',
+        keyFilename: 'serviceAccountKey.json'
+    });
+    var bucket = storage.bucket('recover-now.appspot.com');
+
     fb = {
         register: function (email, pass, callback) {
             firebase.auth().createUser({
@@ -265,7 +292,7 @@ var fb;
             }).then(function (data) {
                 callback({uid: data.uid});
             }, function (err) {
-                console.log('registerError', err);
+                console.trace('registerError', err);
                 callback({err: err.errorInfo});
             });
         },
@@ -273,12 +300,22 @@ var fb;
             client.auth().signInWithEmailAndPassword(email, pass).then(function (data) {
                 callback({uid: data.uid});
             }, function (err) {
-                console.log('loginError', err);
+                console.trace('loginError', err);
                 callback({err: err});
             });
         },
         ref: function (path) {
             return firebase.database().ref(path);
+        },
+        uploadFile: function (path, file, callback) {
+            console.log('boi', file);
+            return bucket.upload(file.path, {destination: path}, function (err, file, apiResponse) {
+                if (err) {
+                    console.trace(err);
+                    return callback({err: err});
+                }
+                callback({success: true});
+            });
         }
     };
 

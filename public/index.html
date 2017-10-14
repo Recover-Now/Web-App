@@ -19,11 +19,12 @@
 </div>
 <br><br>
 <div id="register">
-    <form action="/register" method="post">
+    <form action="/register" method="post" enctype="multipart/form-data">
         <input type="text" name="fname" placeholder="First Name"/>&nbsp;
         <input type="text" name="lname" placeholder="Last Name"/><br>
         <input type="text" name="email" placeholder="Email"/><br>
         <input type="text" name="phone" placeholder="Phone Number"/><br>
+        Profile Picture: <input type="file" name="profilePic"/><br>
         <input type="password" class="pass" name="password" placeholder="Password"/><br>
         <input type="password" class="cpass" placeholder="Confirm Password"/><br>
         <input type="button" class="btn" value="Register"/>
