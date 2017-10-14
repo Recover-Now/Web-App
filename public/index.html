@@ -6,13 +6,35 @@
 -->
 <html>
 	<head>
-		<title>Editorial by HTML5 UP</title>
+		<title>RecoverNow</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
 		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+        <style>
+        
+        #mapSection{
+            position: relative;
+            height:700px;
+        }
+        
+        #map{
+            position: absolute;
+            width:100%;
+            height:100%;
+        }
+        
+        #mapBorder{
+            position: absolute;
+            width:100%;
+            height:70%;
+            border-radius:10px;
+            overflow: hidden;
+        }
+        
+        </style>
 	</head>
 	<body>
 
@@ -25,7 +47,7 @@
 
 							<!-- Header -->
 								<header id="header">
-									<a href="index.html" class="logo"><strong>RecoverNow</strong> by Anotha one</a>
+									<a href="index.html" class="logo"><strong>RecoverNow</strong> by One more thing</a>
 									<ul class="icons">
 										<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
 										<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
@@ -48,9 +70,23 @@
 										</ul>
 									</div>
 									<span class="image object">
-										<img src="images/pic10.jpg" alt="" />
+										<img src="images/img1.jpg" alt="" />
 									</span>
 								</section>
+                                
+                                <!-- SectionSDLJFKHLKDSJFSDKJFHLKHJDSFKJHSDLFKJHSDLKFHKLJSFHDJKH -->
+
+                                <section id="mapSection">
+                                    <header class="major">
+                                        <h2>Activity:</h2>
+                                    </header>
+                                    <div id="mapBorder">
+                                        <div id="map"></div>
+                                    </div>
+
+                                </section>
+
+
 
 							<!-- Section -->
 								<section>
@@ -242,6 +278,48 @@
 			<script src="assets/js/util.js"></script>
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="assets/js/main.js"></script>
+            <script>
+                function initMap() {
 
+                /* Data points defined as an array of LatLng objects */
+                var heatmapData = [
+                new google.maps.LatLng(37.782, -122.447),
+                new google.maps.LatLng(37.782, -122.445),
+                new google.maps.LatLng(37.782, -122.443),
+                new google.maps.LatLng(37.782, -122.441),
+                new google.maps.LatLng(37.782, -122.439),
+                new google.maps.LatLng(37.782, -122.437),
+                new google.maps.LatLng(37.782, -122.435),
+                new google.maps.LatLng(37.785, -122.447),
+                new google.maps.LatLng(37.785, -122.445),
+                new google.maps.LatLng(37.785, -122.443),
+                new google.maps.LatLng(37.785, -122.441),
+                new google.maps.LatLng(37.785, -122.439),
+                new google.maps.LatLng(37.785, -122.437),
+                new google.maps.LatLng(37.785, -122.435)
+                ];
+                
+                var sanFrancisco = new google.maps.LatLng(37.774546, -100.433523);
+                
+                map = new google.maps.Map(document.getElementById('map'), {
+                center: sanFrancisco,
+                zoom: 4,
+                mapTypeId: 'satellite'
+                });
+                
+                var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: heatmapData
+                });
+                heatmap.setMap(map);
+       
+                }
+
+                initMap();
+                
+                </script>
+            <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBw6E-_uVOzeGY3stfErjYzan_oI89hubg&libraries=visualization&callback=initMap">
+                </script>
+            
 	</body>
 </html>
