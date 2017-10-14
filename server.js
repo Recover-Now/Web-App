@@ -191,15 +191,30 @@ var web;
         });
     });
 
-    var sockets = [];
+    app.post('/ineedhelp', function (req, res) {
+        var lat = req.body.latitude;
+        var lon = req.body.longitude;
+
+        if (!lat || !lon) {
+            return res.redirect('/dashboard.html');
+        }
+
+        var session = req.session;
+
+        sess.verifySession(session.ourId, function (uid) {
+            if (!uid) {
+                return res.redirect('/dashboard.html');
+            }
+            recover.updateHelpRequest(uid, lat, lon);
+            return res.redirect('/dashboard.html');
+        })
+    });
 
     io.on('connection', function (socket) {
-        sockets.push(socket);
-        console.log('AD', sockets.length);
+        socket.join('myroom');
 
-        socket.on('disconnect', function () {
-            sockets.splice(sockets.indexOf(socket), 1);
-            console.log('RM', sockets.length);
+        recover.getHeatmapData(function (array) {
+            socket.emit('heatmapData', array);
         })
     });
 
@@ -208,6 +223,9 @@ var web;
             http.listen(config.port, function () {
                 console.log('Listening on *:' + config.port);
             });
+        },
+        broadcastHeatmapData: function (array) {
+            io.to('myroom').emit('heatmapData', array);
         }
     };
 })();
@@ -373,6 +391,32 @@ var fb;
 //Main data api
 var recover;
 (function () {
+    var formatHeatmapData = function (users) {
+        if (!users) {
+            return [];
+        }
+
+        var array = [];
+
+        var userIds = Object.keys(users);
+        for (var i = 0; i < userIds.length; i++) {
+            var user = users[userIds[i]];
+
+            if (lib.now() - user.helpRequest < config.heapmapDataExpire * 60 * 1000) {
+                array.push({
+                    latitude: user.latitude,
+                    longitude: user.longitude
+                });
+            }
+        }
+
+        return array;
+    };
+
+    fb.ref(config.firebase.userPath).on('value', function (snap) {
+        web.broadcastHeatmapData(formatHeatmapData(snap.val()));
+    });
+
     recover = {
         addResource: function (uid, cityId, title, content, category) {
             fb.getUniqueKey(20, config.firebase.resourcePath, function (resourceId) {
@@ -402,19 +446,16 @@ var recover;
                 fb.ref(config.firebase.locationPath + cityId + '/recoveryAreas').update(dat);
             });
         },
+        updateHelpRequest: function (uid, lat, lon) {
+            fb.ref(config.firebase.userPath + uid).update({
+                helpRequest: lib.now(),
+                latitude: lat,
+                longitude: lon
+            });
+        },
         getHeatmapData: function (callback) {
             fb.ref(config.firebase.userPath).once('value', function (snap) {
-                var users = snap.val();
-                if (!users) {
-                    return callback([]);
-                }
-
-                var array = [];
-
-                var userIds = Object.keys(users);
-                for (var i = 0; i < array.length; i++) {
-                    var user = users[userIds[i]];
-                }
+                callback(formatHeatmapData(snap.val()));
             });
         }
     };
@@ -433,7 +474,3 @@ for (var i = 0; i < 5; i++) {
 
 //Start web
 web.start();
-
-recover.getHeatmapData(function (data) {
-    console.log('hm dat',data);
-});

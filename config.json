@@ -1,6 +1,7 @@
 {
   "port": 80,
   "sessionExpire": 3600,
+  "heapmapDataExpire": 1440,
   "firebase": {
     "sessionPath": "/RNSession/",
     "userPath": "/RNUser/",
