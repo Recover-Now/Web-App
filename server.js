@@ -141,7 +141,8 @@ var web;
                                 firstName: firstName,
                                 lastName: lastName,
                                 email: email,
-                                phoneNumber: phone
+                                phoneNumber: phone,
+                                helpRequest: 0
                             });
                             return resolve('Registration success! Please login');
                         }
@@ -190,10 +191,16 @@ var web;
         });
     });
 
+    var sockets = [];
+
     io.on('connection', function (socket) {
-        socket.on('test', function (d) {
-            console.log(d);
-        });
+        sockets.push(socket);
+        console.log('AD', sockets.length);
+
+        socket.on('disconnect', function () {
+            sockets.splice(sockets.indexOf(socket), 1);
+            console.log('RM', sockets.length);
+        })
     });
 
     web = {
@@ -395,6 +402,21 @@ var recover;
                 fb.ref(config.firebase.locationPath + cityId + '/recoveryAreas').update(dat);
             });
         },
+        getHeatmapData: function (callback) {
+            fb.ref(config.firebase.userPath).once('value', function (snap) {
+                var users = snap.val();
+                if (!users) {
+                    return callback([]);
+                }
+
+                var array = [];
+
+                var userIds = Object.keys(users);
+                for (var i = 0; i < array.length; i++) {
+                    var user = users[userIds[i]];
+                }
+            });
+        }
     };
 })();
 
@@ -411,3 +433,7 @@ for (var i = 0; i < 5; i++) {
 
 //Start web
 web.start();
+
+recover.getHeatmapData(function (data) {
+    console.log('hm dat',data);
+});
