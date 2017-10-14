@@ -218,14 +218,24 @@ var web;
         });
     });
 
+    var latestHeatmapData;
+    var heatmapDataUpdated = false;
+    setInterval(function () {
+        if (heatmapDataUpdated) {
+            heatmapDataUpdated = false;
+            io.to('myroom').emit('heatmapData', latestHeatmapData);
+        }
+    }, 1000);
+
     web = {
         start: function () {
             http.listen(config.port, function () {
                 console.log('Listening on *:' + config.port);
             });
         },
-        broadcastHeatmapData: function (array) {
-            io.to('myroom').emit('heatmapData', array);
+        broadcastHeatmapData: function (map) {
+            latestHeatmapData = map;
+            heatmapDataUpdated = true;
         }
     };
 })();
@@ -396,21 +406,21 @@ var recover;
             return [];
         }
 
-        var array = [];
+        var map = {};
 
         var userIds = Object.keys(users);
         for (var i = 0; i < userIds.length; i++) {
             var user = users[userIds[i]];
 
             if (lib.now() - user.helpRequest < config.heapmapDataExpire * 60 * 1000) {
-                array.push({
+                map[userIds[i]] = {
                     latitude: user.latitude,
                     longitude: user.longitude
-                });
+                };
             }
         }
 
-        return array;
+        return map;
     };
 
     fb.ref(config.firebase.userPath).on('value', function (snap) {
@@ -496,6 +506,18 @@ fb.ref(config.firebase.userPath).once('value', function (snap) {
         recover.updateHelpRequest(userIds[i], lat, lon);
     }
 });
+/*
+fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+    var arr = snap.val();
+    var ids = Object.keys(arr);
+    console.log(arr);
+    for (var i = 0; i < ids.length; i++) {
+        fb.ref(config.firebase.recoveryPath + ids[i]).update({
+            latitude: 33 - Math.pow(Math.random()*2-1, 3),
+            longitude: -84 + Math.pow(Math.random()*2-1, 3)
+        });
+    }
+});*/
 
 //Start web
 web.start();

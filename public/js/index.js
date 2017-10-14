@@ -1,13 +1,25 @@
 var socket = io();
 
-socket.on('heatmapData', function (array) {
-    console.log(array);
+var hmMap = {};
+
+socket.on('heatmapData', function (map) {
+    console.log(map);
+    var uids = Object.keys(map);
+    for (var i = 0; i < uids.length; i++) {
+        var uid = uids[i];
+        hmMap[uid] = map[uid];
+    }
+
+    uids = Object.keys(hmMap);
+
     var hmdata = [];
-    for (var i = 0; i < array.length; i++) {
-        hmdata.push(new google.maps.LatLng(array[i].latitude, array[i].longitude));
+    for (var i = 0; i < uids.length; i++) {
+        var uid = uids[i];
+        hmdata.push(new google.maps.LatLng(hmMap[uid].latitude, hmMap[uid].longitude));
     }
 
     var newdata = new google.maps.MVCArray(hmdata);
+    console.log(hmdata);
     heatmap.set('data', newdata);
 });
 
