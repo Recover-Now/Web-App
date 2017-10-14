@@ -8,9 +8,18 @@ $('input[type="submit"]').mouseup(function(){
 $('#loginform').click(function(){
     $('.login').fadeToggle('slow');
     $(this).toggleClass('green');
+    var rect = $('#loginform')[0].getBoundingClientRect();
+    var loginRect = $('.login')[0].getBoundingClientRect();
+    $('#navthing').find('.arrow-up').css('left', (rect.left - loginRect.left + 12) + 'px');
 });
 
-
+$('#registerform').click(function(){
+    $('.login').fadeToggle('slow');
+    $(this).toggleClass('green');
+    var rect = $('#registerform')[0].getBoundingClientRect();
+    var loginRect = $('.login')[0].getBoundingClientRect();
+    $('#navthing').find('.arrow-up').css('left', (rect.left - loginRect.left + 25) + 'px');
+});
 
 $(document).mouseup(function (e)
 {

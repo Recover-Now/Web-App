@@ -26,6 +26,8 @@ fieldset {
     width: 350px;
     display: none;
     z-index: 2;
+    text-align: left;
+    top: -30px;
 }
 
 .arrow-up {
