@@ -178,6 +178,18 @@ var web;
         res.redirect('/index.html');
     });
 
+    app.post('/addresource', function (req, res) {
+        var session = req.session;
+
+        sess.verifySession(session.ourId, function (uid) {
+            if (!uid) {
+                return res.redirect('/index.html');
+            }
+
+
+        });
+    });
+
     io.on('connection', function (socket) {
         socket.on('test', function (d) {
             console.log(d);
@@ -204,19 +216,6 @@ var sess;
         sessions.push(sessions.splice(sessions.indexOf(sessionId), 1)[0]);
     };
 
-    var getNewSession = function (callback) {
-        var id = lib.randomString(64);
-
-        //Check that this sessionId isn't being used
-        fb.ref(config.firebase.sessionPath + id).once('value', function (snap) {
-            if (snap.val()) {
-                getNewSession(callback);
-            } else {
-                callback(id);
-            }
-        });
-    };
-
     //Check and destroy expired sessions
     setInterval(function () {
         var toDestroy = [];
@@ -233,7 +232,7 @@ var sess;
 
     sess = {
         createSession: function (uid, callback) {
-            getNewSession(function (sessionId) {
+            fb.getUniqueKey(64, config.firebase.sessionPath, function (sessionId) {
                 fb.ref(config.firebase.sessionPath + sessionId).set(uid);
                 sessions.push(sessionId);
                 renewSession(sessionId);
@@ -345,6 +344,18 @@ var fb;
             }, function (err) {
                 callback({err: err.errorInfo});
             })
+        },
+        getUniqueKey: function (len, parentPath, callback) {
+            var id = lib.randomString(len);
+
+            //Check that this sessionId isn't being used
+            fb.ref(parentPath + id).once('value', function (snap) {
+                if (snap.val()) {
+                    fb.getUniqueKey(len, parentPath, callback);
+                } else {
+                    callback(id);
+                }
+            });
         }
     };
 
@@ -352,24 +363,38 @@ var fb;
     fb.ref('/RFSession').remove();
 })();
 
-//Test data
-var test;
+//Main data api
+var recover;
 (function () {
-    test = {
-        addResourceToCity: function (cityId, resourceData) {
-            var resourceId = lib.randomString(20);
-            fb.ref(config.firebase.resourcePath + resourceId).set(resourceData);
-            var dat = {};
-            dat[resourceId] = true;
-            fb.ref(config.firebase.locationPath + cityId + '/resources').update(dat);
+    recover = {
+        addResource: function (uid, cityId, title, content, category) {
+            fb.getUniqueKey(20, config.firebase.resourcePath, function (resourceId) {
+                fb.ref(config.firebase.resourcePath + resourceId).set({
+                    title: title,
+                    content: content,
+                    poster: uid,
+                    category: category,
+                    cityId: cityId
+                });
+                var dat = {};
+                dat[resourceId] = true;
+                fb.ref(config.firebase.locationPath + cityId + '/resources').update(dat);
+            });
         },
-        addRecoveryToCity: function (cityId, recoveryData) {
-            var recoveryId = lib.randomString(20);
-            fb.ref(config.firebase.recoveryPath + recoveryId).set(recoveryData);
-            var dat = {};
-            dat[recoveryId] = true;
-            fb.ref(config.firebase.locationPath + cityId + '/recoveryAreas').update(dat);
-        }
+        addRecoveryArea: function (uid, cityId, title, content) {
+            fb.getUniqueKey(20, config.firebase.recoveryPath, function (recoveryId) {
+                fb.ref(config.firebase.recoveryPath + recoveryId).set({
+                    title: title,
+                    content: content,
+                    poster: uid,
+                    cityId: cityId,
+                    category: 0
+                });
+                var dat = {};
+                dat[recoveryId] = true;
+                fb.ref(config.firebase.locationPath + cityId + '/recoveryAreas').update(dat);
+            });
+        },
     };
 })();
 
