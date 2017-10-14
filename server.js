@@ -10,6 +10,23 @@ var lib = require('./lib').lib;
 //Setup web & socket.io
 var web;
 (function () {
+    //Load templates
+    var templates = {};
+    fs.readdir(__dirname + '\\templates', function (err, items) {
+        if (err) {
+            return console.trace(err);
+        }
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var spl = item.split('.');
+            var bld = spl[0];
+            for (var j = 1; j < spl.length - 1; j++) {
+                bld += '.' + spl[j];
+            }
+            templates['%' + bld.toUpperCase() + '%'] = fs.readFileSync(__dirname + '\\templates\\' + item, 'utf8');
+        }
+    });
+
     var app = require('express')();
     var http = require('http').Server(app);
     var io = require('socket.io')(http);
@@ -76,12 +93,20 @@ var web;
                     return console.trace(err);
                 }
 
+                var sendData = function (dat) {
+                    if (url.endsWith('.html') && false) {
+                        var keys = Object.keys(templates);
+                        for (var i = 0; i < keys.length; i++) {
+                            dat = dat.replace(new RegExp(keys[i], 'g'), templates[keys[i]]);
+                        }
+                    }
+                    res.send(dat);
+                };
+
                 if (replace[url]) {
-                    replace[url](data, function (newData) {
-                        res.send(newData);
-                    });
+                    replace[url](data, sendData);
                 } else {
-                    res.sendFile(path);
+                    sendData(data);
                 }
             });
         });
