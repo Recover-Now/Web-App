@@ -340,6 +340,16 @@ var web;
             });
         });
 
+        fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+            var areas = snap.val();
+            var keys = Object.keys(areas);
+            var array = [];
+            for (var i = 0; i < keys.length; i++) {
+                array.push(areas[keys[i]]);
+            }
+            socket.emit('recoveryAreas', array);
+        });
+
         recover.getHeatmapData(function (array) {
             socket.emit('heatmapData', array);
         });

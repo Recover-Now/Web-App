@@ -3,7 +3,6 @@ var socket = io();
 var hmMap = {};
 
 socket.on('heatmapData', function (map) {
-    console.log(map);
     var uids = Object.keys(map);
     for (var i = 0; i < uids.length; i++) {
         var uid = uids[i];
@@ -19,41 +18,42 @@ socket.on('heatmapData', function (map) {
     }
 
     var newdata = new google.maps.MVCArray(hmdata);
-    console.log(hmdata);
     heatmap.set('data', newdata);
 });
 
-var heatmap;
-var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-var labelIndex = 0;
+socket.on('recoveryAreas', function (array) {
+    console.log('recov',array);
+    for (var i = 0; i < array.length; i++) {
+        var area = array[i];
 
+        const infowindow = new google.maps.InfoWindow({
+            content: area.title + '<br>' + area.content
+        });
 
+        const marker = new google.maps.Marker({
+            position: new google.maps.LatLng(area.latitude, area.longitude),
+            map: map,
+            title: 'Uluru (Ayers Rock)'
+        });
+
+        marker.addListener('click', function () {
+            infowindow.open(map, marker);
+        });
+    }
+});
+
+var map, heatmap;
 
 function initMap() {
-  
-           
+    //Setup map
     var sanFrancisco = new google.maps.LatLng(37.774546, -120.433523);
-
     map = new google.maps.Map(document.getElementById('map'), {
         center: sanFrancisco,
         zoom: 4,
         mapTypeId: 'satellite'
     });
-    
-    var infowindow = new google.maps.InfoWindow({
-                                                content: "RedCross Relief Tent"
-                                                });
-    
-    var marker = new google.maps.Marker({
-                                        position: sanFrancisco,
-                                        map: map,
-                                        title: 'Uluru (Ayers Rock)'
-                                        });
-    marker.addListener('click', function() {
-                       infowindow.open(map, marker);
-                       });
-     
 
+    //Setup heatmap
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: []
     });

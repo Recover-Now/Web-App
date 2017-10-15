@@ -1,5 +1,11 @@
 {
-	"webcredentials": {
-		"apps": ["V7HL83ZN6U.com.recovernowapp.Recover-Now"]
-	}
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "V7HL83ZN6U.com.recovernowapp.Recover-Now",
+                "paths": [ "*" ]
+            }
+        ]
+    }
 }
