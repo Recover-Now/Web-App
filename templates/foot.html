@@ -2,70 +2,99 @@
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/skel.min.js"></script>
 <script src="assets/js/util.js"></script>
-<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+<!--[if lte IE 8]>
+<script src="assets/js/ie/respond.min.js"></script><![endif]-->
 <script src="assets/js/main.js"></script>
 <script src="assets/js/login.js"></script>
 <script>
     function findGetParameter(parameterName) {
         var result = null,
-        tmp = [];
+                tmp = [];
         location.search
-        .substr(1)
-        .split("&")
-        .forEach(function (item) {
-                 tmp = item.split("=");
-                 if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-                 });
-                 return result;
+                .substr(1)
+                .split("&")
+                .forEach(function (item) {
+                    tmp = item.split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                });
+        return result;
     }
 
-function initToWinit() {
-    // Select all links with hashes
-    $('a[href*="#"]')
-    // Remove links that don't actually link to anything
-    .not('[href="#"]')
-    .not('[href="#0"]')
-    .click(function(event) {
-           // On-page links
-           if (
-               location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '')
-                                         &&
-                                         location.hostname == this.hostname
-                                         ) {
-               // Figure out element to scroll to
-               var target = $(this.hash);
-               target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-               // Does a scroll target exist?
-               if (target.length) {
-               // Only prevent default if animation is actually gonna happen
-               event.preventDefault();
-               $('html, body').animate({
-                                       scrollTop: target.offset().top
-                                       }, 1000, function() {
-                                       // Callback after animation
-                                       // Must change focus!
-                                       var $target = $(target);
-                                       $target.focus();
-                                       if ($target.is(":focus")) { // Checking if the target was focused
-                                       return false;
-                                       } else {
-                                       $target.attr('tabindex','-1'); // Adding tabindex for elements not focusable
-                                       $target.focus(); // Set focus again
-                                       };
-                                       });
-               }
-               }
-               });
-           }
-           initToWinit();
-           var msg = findGetParameter('msg');
-           if (msg) {
-           alert(msg);
-           }
-           
-           if (window.location.href.indexOf('dashboard.html') >= 0) {
-           $('#mywrap').css('display', 'none');
-           $('#dashboardmywrap').css('display', 'block').find('.profilebtn').html(serverData.firstName + ' ' + serverData.lastName + ' &#9660;');
-           }
-</script>
+    function initToWinit() {
+        // Select all links with hashes
+        $('a[href*="#"]')
+        // Remove links that don't actually link to anything
+                .not('[href="#"]')
+                .not('[href="#0"]')
+                .click(function (event) {
+                    // On-page links
+                    if (
+                            location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '')
+                            &&
+                            location.hostname == this.hostname
+                    ) {
+                        // Figure out element to scroll to
+                        var target = $(this.hash);
+                        target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+                        // Does a scroll target exist?
+                        if (target.length) {
+                            // Only prevent default if animation is actually gonna happen
+                            event.preventDefault();
+                            $('html, body').animate({
+                                scrollTop: target.offset().top
+                            }, 1000, function () {
+                                // Callback after animation
+                                // Must change focus!
+                                var $target = $(target);
+                                $target.focus();
+                                if ($target.is(":focus")) { // Checking if the target was focused
+                                    return false;
+                                } else {
+                                    $target.attr('tabindex', '-1'); // Adding tabindex for elements not focusable
+                                    $target.focus(); // Set focus again
+                                }
+                            });
+                        }
+                    }
+                });
+    }
+    initToWinit();
+    var msg = findGetParameter('msg');
+    if (msg) {
+        alert(msg);
+    }
 
+    var inAuth = ['dashboard.html', 'profile.html', 'recoveryAreas.html'];
+    if (serverData.authenticated) {
+        inAuth.push('/checkinList.html');
+    }
+    var areWeInAuth = false;
+    for (var i = 0; i < inAuth.length; i++) {
+        if (window.location.href.indexOf(inAuth[i]) >= 0) {
+            areWeInAuth = true;
+        }
+    }
+    if (areWeInAuth) {
+        $('#mywrap').css('display', 'none');
+        $('#dashboardmywrap').css('display', 'block').find('.profilebtn').find('.imgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
+        $('#dashboardmywrap').find('.bigimgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
+        var $rightinfo = $('#dashboardmywrap').find('.rightinfo');
+        $rightinfo.find('.myname').html(serverData.firstName + ' ' + serverData.lastName);
+        $rightinfo.find('.myemail').html(serverData.email);
+        $rightinfo.find('.myphone').html(serverData.phoneNumber);
+        $('#thelogoutbutton').click(function () {
+            $('#logoutform').submit();
+        })
+    }
+
+    function onWindowResize() {
+        if ($(window).width() <= 650) {
+            $('#mywrap').css('top', '0px');
+        } else {
+            $('#mywrap').css('top', '35px');
+        }
+    }
+    onWindowResize();
+    $(window).resize(onWindowResize);
+
+</script>

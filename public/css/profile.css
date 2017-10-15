@@ -1,0 +1,21 @@
+#mystuff table tr {
+    background-color: white;
+    border: 0;
+}
+
+#mystuff table tr td:first-child {
+    padding: 0 5px 0 0;
+}
+
+#mystuff table tr td:last-child {
+    padding: 0 0 0 5px;
+}
+
+#saveChangesBtn {
+    position: relative;
+    top: 27px;
+}
+
+#changePassBtn {
+    float: right;
+}

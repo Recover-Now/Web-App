@@ -36,7 +36,7 @@ $register.find('.btn').click(function () {
     var pass = $register.find('.pass').val();
     var cpass = $register.find('.cpass').val();
     if (pass != cpass) {
-        return alert('Boi u wrong aboot what? YOUR PASSSS IS NOT MATCH');
+        return alert('Passwords do not match');
     }
     $register.submit();
 });
@@ -54,5 +54,13 @@ $(document).mouseup(function (e)
     {
         container.hide();
         $('#loginform').removeClass('green');
+    }
+
+    container = $("#profilepopup");
+
+    if (!container.is(e.target) // if the target of the click isn't the container...
+        && container.has(e.target).length === 0) // ... nor a descendant of the container
+    {
+        container.hide();
     }
 });
