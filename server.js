@@ -394,6 +394,8 @@ var web;
         socket.on('dashboard', function () {
             var session = socket.handshake.session;
 
+            socket.join('resources' + session.geo);
+
             recover.getResources(session.geo, function (data) {
                 socket.emit('resources', data);
             });
@@ -439,6 +441,9 @@ var web;
         },
         broadcastCheckinData: function (areaId, checks) {
             io.to('checkin' + areaId).emit('checkins', checks);
+        },
+        broadcastResources: function (geo, data) {
+            io.to('resources' + geo).emit('resources', data);
         }
     };
 })();
@@ -642,6 +647,24 @@ var fb;
         }
     });
 
+    //Listen to resource changes
+    var resourceListen = [];
+    fb.ref(config.firebase.locationPath).on('value', function (snap) {
+        var locs = snap.val();
+        var locIds = Object.keys(locs);
+        for (var i = 0; i < locIds.length; i++) {
+            const locId = locIds[i];
+            if (resourceListen.indexOf(locId) < 0) {
+                resourceListen.push(locId);
+                fb.ref(config.firebase.locationPath + locId).on('value', function (snap) {
+                    recover.getResources(locId, function (data) {
+                        web.broadcastResources(locId, data);
+                    });
+                })
+            }
+        }
+    });
+
     //Clear all old sessions
     fb.ref('/RFSession').remove();
 })();
@@ -725,8 +748,6 @@ var recover;
         web.broadcastHeatmapData(formatHeatmapData(snap.val()));
     });
 
-    var resourceListeners = [];
-
     recover = {
         addResource: function (uid, cityId, title, content, category) {
             fb.getUniqueKey(20, config.firebase.resourcePath, function (resourceId) {
@@ -769,10 +790,6 @@ var recover;
             });
         },
         getResources: function (cityId, callback) {
-            if (resourceListeners.indexOf(cityId) < 0) {
-
-            }
-
             fb.ref(config.firebase.locationPath + cityId).once('value', function (snap) {
                 var val = snap.val();
                 if (!val) {
