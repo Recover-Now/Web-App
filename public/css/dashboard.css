@@ -7,6 +7,13 @@
     margin-top: 5px;
 }
 
+#resourceswrap .resourceobj .checkin {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+}
+
 #resourceswrap .resourceobj .pic {
     position: absolute;
     left: 0;
@@ -33,6 +40,8 @@
 #resourceswrap .resourceobj .text .title {
     font-size: 20px;
     font-weight: bold;
+    max-width: 70%;
+    word-break: break-all;
 }
 
 #resourceswrap .resourceobj .text .posterimg {

@@ -16,7 +16,7 @@ var pics = {
 socket.on('resources', function (data) {
     $resourceswrap.html('');
 
-    var group = data.resources;
+    var group = data.recoveryAreas;
 
     var keys = Object.keys(group);
     keys.sort(function (a, b) {
@@ -26,10 +26,14 @@ socket.on('resources', function (data) {
     });
 
     for (var i = 0; i < keys.length; i++) {
-        var id = keys[i];
+        const id = keys[i];
         var item = group[id];
         var $div = $(document.createElement('div')).addClass('resourceobj');
         $div.append('<div class="pic"><img src="' + pics[item.category] + '"/></div>');
+        $div.append('<div class="checkin"><input type="button" value="See Check-in List"/></div>');
+        $div.find('.checkin').find('input').click(function () {
+            window.location.href = 'checkinList.html?recoveryArea=' + id;
+        });
         var $text = $(document.createElement('div')).addClass('text');
         $text.append('<div class="title">' + item.title + '</div>');
         $text.append('<div class="content">' + item.content + '</div>');

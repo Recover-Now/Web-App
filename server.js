@@ -55,7 +55,7 @@ var web;
     app.use(bodyParser.json());
     app.use(session);
 
-    var needAuth = ['/dashboard.html', '/profile.html'];
+    var needAuth = ['/dashboard.html', '/profile.html', '/recoveryAreas.html'];
 
     app.get('/profilepic', function (req, res) {
         var email = req.query.email;
@@ -123,7 +123,8 @@ var web;
 
             var replace = {
                 '/dashboard.html': replaceUserInfo,
-                '/profile.html': replaceUserInfo
+                '/profile.html': replaceUserInfo,
+                '/recoveryAreas.html': replaceUserInfo
             };
 
             fs.readFile(path, 'utf8', function (err, data) {
