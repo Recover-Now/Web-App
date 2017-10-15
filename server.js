@@ -391,6 +391,11 @@ var web;
         })
     });
 
+    app.post('/clearcheckins', function (req, res) {
+        fb.ref(config.firebase.locationCheckIn).remove();
+        res.redirect('/olddashboard.html');
+    });
+
     io.use(sharedsession(session, {
         autoSave: true
     }));
@@ -640,12 +645,17 @@ var fb;
     var checkinListen = [];
     fb.ref(config.firebase.locationCheckIn).on('value', function (snap) {
         var areas = snap.val();
+        if (!areas) {
+            return;
+        }
         var areaIds = Object.keys(areas);
         for (var i = 0; i < areaIds.length; i++) {
             const areaId = areaIds[i];
             if (checkinListen.indexOf(areaId) < 0) {
+                console.log('adding', areaId);
                 checkinListen.push(areaId);
                 fb.ref(config.firebase.locationCheckIn + areaId).on('value', function (snap) {
+                    console.log(areaId,'changed');
                     recover.getCheckins(areaId, function (checks) {
                         web.broadcastCheckinData(areaId, checks);
                     });
