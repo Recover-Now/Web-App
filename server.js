@@ -28,7 +28,11 @@ var web;
     loadTemplates();
 
     var getIp = function (req) {
-        var ip = req.connection.remoteAddress;
+        var ip = req.headers['x-forwarded-for'];
+        if (ip) {
+            return ip;
+        }
+        ip = req.connection.remoteAddress;
         if (ip == '::1' && config.islocal) {
             ip = '128.61.7.129';
         }
