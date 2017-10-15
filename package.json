@@ -23,7 +23,7 @@
     "gcloud": "^0.37.2",
     "socket.io": "^2.0.3",
     "mime": "^2.0.3",
-    "geoip-lite": "^1.1.6"
+    "geoip-lite": "latest"
   },
   "bugs": {
     "url": "https://github.com/Recover-Now/Web-App/issues"
