@@ -30,12 +30,15 @@ var labelIndex = 0;
 
 
 function initMap() {
-  
-           
-    var sanFrancisco = new google.maps.LatLng(37.774546, -120.433523);
+    
+    var center = new google.maps.LatLng(37.774546, -100.433523);
+    var wineCountry = new google.maps.LatLng(33.51536,   -117.103348);
+    var houston = new google.maps.LatLng(29.7604,   -95.3698);
+    var puertorico = new google.maps.LatLng(18.2208,   -66.5901);
+    var miami = new google.maps.LatLng(25.7617,   -80.1918);
 
     map = new google.maps.Map(document.getElementById('map'), {
-        center: sanFrancisco,
+        center: center,
         zoom: 4,
         mapTypeId: 'satellite'
     });
@@ -45,15 +48,33 @@ function initMap() {
                                                 });
     
     var marker = new google.maps.Marker({
-                                        position: sanFrancisco,
+                                        position: wineCountry,
                                         map: map,
-                                        title: 'Uluru (Ayers Rock)'
+                                        title: 'Relief Tent'
                                         });
     marker.addListener('click', function() {
                        infowindow.open(map, marker);
                        });
      
 
+    var infowindow2 = new google.maps.InfoWindow({
+                                                content: "National Guard Relief Tent"
+                                                });
+    
+   var marker2 = new google.maps.Marker({
+                                        position: houston,
+                                        map: map,
+                                        title: 'Relief Tent'
+                                        });
+    marker2.addListener('click', function() {
+                       infowindow2.open(map, marker2);
+                       });
+    
+
+    
+    
+    
+    
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: []
     });
