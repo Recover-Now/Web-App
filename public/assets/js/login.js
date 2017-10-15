@@ -6,6 +6,8 @@ $('input[type="submit"]').mouseup(function(){
 });
 
 $('#loginform').click(function(){
+    $('.modemode').css('display', 'none');
+    $('.modelogin').css('display', 'block');
     $('.login').fadeToggle('slow');
     $(this).toggleClass('green');
     var rect = $('#loginform')[0].getBoundingClientRect();
@@ -14,11 +16,23 @@ $('#loginform').click(function(){
 });
 
 $('#registerform').click(function(){
+    $('.modemode').css('display', 'none');
+    $('.moderegister').css('display', 'block');
     $('.login').fadeToggle('slow');
     $(this).toggleClass('green');
     var rect = $('#registerform')[0].getBoundingClientRect();
     var loginRect = $('.login')[0].getBoundingClientRect();
     $('#navthing').find('.arrow-up').css('left', (rect.left - loginRect.left + 25) + 'px');
+});
+
+var $register = $('#regform');
+$register.find('.btn').click(function () {
+    var pass = $register.find('.pass').val();
+    var cpass = $register.find('.cpass').val();
+    if (pass != cpass) {
+        return alert('Boi u wrong aboot what? YOUR PASSSS IS NOT MATCH');
+    }
+    $register.submit();
 });
 
 $(document).mouseup(function (e)

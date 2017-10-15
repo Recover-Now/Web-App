@@ -4,6 +4,55 @@
     bottom: 0;
 }
 
+.modemode form {
+    margin: 0 !important;
+}
+
+.modemode {
+    display: none;
+}
+
+.modemode input:not(.half) {
+    width: 100% !important;
+}
+
+.modemode input.half {
+    width: 100% !important;
+}
+
+.modemode table {
+    margin: 0 !important;
+}
+
+.modemode table tr {
+    border: 0 !important;
+}
+
+.modemode table tr td {
+    padding: 0 3px !important;
+}
+
+.lastnamee {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.profilepicwrap {
+    background: white;
+    padding: 7px 5px;
+    margin: 10px 0;
+    width: 100%;
+    display: block;
+    font-size: 18px;
+    border-radius: 5px;
+    border: none;
+    -webkit-transition: 0.3s linear;
+    -moz-transition: 0.3s linear;
+    -o-transition: 0.3s linear;
+    transition: 0.3s linear;
+}
+
 #wrap {
     text-align: right;
 }
@@ -47,7 +96,7 @@ fieldset {
     border-radius: 5px;
     padding-top: 5px;
 }
-.formholder input[type="email"], .formholder input[type="password"] {
+.formholder input[type="email"], .formholder input[type="password"], .formholder input[type="text"] {
     padding: 7px 5px;
     margin: 10px 0;
     width: 96%;
@@ -60,13 +109,12 @@ fieldset {
     -o-transition: 0.3s linear;
     transition: 0.3s linear;
 }
-.formholder input[type="email"]:focus, .formholder input[type="password"]:focus {
+.formholder input[type="email"]:focus, .formholder input[type="password"]:focus, .formholder input[type="text"]:focus {
     outline: none;
     box-shadow: 0 0 1px 1px #1abc9c;
 }
-.formholder input[type="submit"] {
+.formholder input[type="submit"], .formholder input[type="button"] {
     background: #1abc9c;
-    padding: 10px;
     font-size: 20px;
     display: block;
     width: 100%;
@@ -74,7 +122,7 @@ fieldset {
     color: #fff;
     border-radius: 5px;
 }
-.formholder input[type="submit"]:hover {
+.formholder input[type="submit"]:hover, .formholder input[type="button"]:hover {
     background: #1bc6a4;
 }
 
