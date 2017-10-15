@@ -5,3 +5,27 @@
 <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 <script src="assets/js/main.js"></script>
 <script src="assets/js/login.js"></script>
+<script>
+    function findGetParameter(parameterName) {
+        var result = null,
+                tmp = [];
+        location.search
+                .substr(1)
+                .split("&")
+                .forEach(function (item) {
+                    tmp = item.split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                });
+        return result;
+    }
+
+    var msg = findGetParameter('msg');
+    if (msg) {
+        alert(msg);
+    }
+
+    if (window.location.href.indexOf('dashboard.html') >= 0) {
+        $('#mywrap').css('display', 'none');
+        $('#dashboardmywrap').css('display', 'block').find('.profilebtn').html(serverData.firstName + ' ' + serverData.lastName + ' &#9660;');
+    }
+</script>

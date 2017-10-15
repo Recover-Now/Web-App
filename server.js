@@ -530,26 +530,44 @@ for (var i = 0; i < 900; i++) {
     });
 }*/
 
+function randomLatLng() {
+    return {
+        latitude: 33.748995 - Math.pow(Math.random()*1-.5, 3),
+        longitude: -84.387982 + Math.pow(Math.random()*1-.5, 3)
+    };
+}
+/*
 fb.ref(config.firebase.userPath).once('value', function (snap) {
     var users = snap.val();
     var userIds = Object.keys(users);
     for (var i = 0; i < userIds.length; i++) {
-        var lat = 33 - Math.pow(Math.random()*2-1, 3);
-        var lon = -84 + Math.pow(Math.random()*2-1, 3);
-        recover.updateHelpRequest(userIds[i], lat, lon);
+        var latlng = randomLatLng();
+        recover.updateHelpRequest(userIds[i], latlng.latitude, latlng.longitude);
     }
-});
+});*/
 /*
-fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+fb.ref(config.firebase.resourcePath).once('value', function (snap) {
     var arr = snap.val();
     var ids = Object.keys(arr);
-    console.log(arr);
     for (var i = 0; i < ids.length; i++) {
-        fb.ref(config.firebase.recoveryPath + ids[i]).update({
-            latitude: 33 - Math.pow(Math.random()*2-1, 3),
-            longitude: -84 + Math.pow(Math.random()*2-1, 3)
-        });
+        fb.ref(config.firebase.resourcePath + ids[i]).update(randomLatLng());
     }
+});*/
+
+//Update poster ids
+/*
+fb.ref(config.firebase.userPath).once('value', function (snap) {
+    var users = snap.val();
+    var userIds = Object.keys(users);
+    fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+        var arr = snap.val();
+        var ids = Object.keys(arr);
+        for (var i = 0; i < ids.length; i++) {
+            fb.ref(config.firebase.recoveryPath + ids[i]).update({
+                poster: userIds[Math.floor(Math.random() * userIds.length)]
+            });
+        }
+    });
 });*/
 
 //Start web

@@ -1,5 +1,9 @@
 <header id="header">
     <a href="index.html" class="logo"><strong>RecoverNow</strong> by One more thing</a>
+    <div id="dashboardmywrap">
+        <div class="profilebtn"></div>
+        <div id="profilepopup"></div>
+    </div>
     <div id="mywrap">
         <div id="wrap">
             <div id="regbar">
@@ -9,14 +13,48 @@
                         <div class="arrow-up"></div>
                         <div class="formholder">
                             <div class="randompad">
-                                <fieldset>
-                                    <label name="email">Email</label>
-                                    <input type="email" />
-                                    <label name="password">Password</label>
-                                    <input type="password" />
-                                    <input type="submit" value="Login" />
-
-                                </fieldset>
+                                <div class="modemode modelogin">
+                                    <fieldset>
+                                        <form action="/login" method="post">
+                                            <label name="email">Email</label>
+                                            <input type="email" class="first" name="email" />
+                                            <label name="password">Password</label>
+                                            <input type="password" name="password" />
+                                            <input type="submit" value="Login" />
+                                        </form>
+                                    </fieldset>
+                                </div>
+                                <div class="modemode moderegister">
+                                    <fieldset>
+                                        <form id="regform" action="/register" method="post" enctype="multipart/form-data">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        <label name="fname">First Name</label>
+                                                        <input class="first" type="text" name="fname" class="half" />
+                                                    </td>
+                                                    <td>
+                                                        <label name="lname">Last Name</label>
+                                                        <input type="text" name="lname" class="half" />
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <label name="email">Email</label>
+                                            <input type="email" name="email" />
+                                            <label name="phone">Phone</label>
+                                            <input type="text" name="phone" />
+                                            <label name="phone">Profile Picture</label>
+                                            <div class="profilepicwrap">
+                                                <input type="file" name="profilePic" />
+                                            </div>
+                                            <label name="password">Password</label>
+                                            <input type="password" name="password" class="pass" />
+                                            <label name="cpassword">Confirm Password</label>
+                                            <input type="password" class="cpass" />
+                                            <input type="button" class="btn" value="Register" />
+                                        </form>
+                                    </fieldset>
+                                </div>
                             </div>
                         </div>
                     </div>
