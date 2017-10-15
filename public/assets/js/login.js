@@ -8,6 +8,9 @@ $('input[type="submit"]').mouseup(function(){
 $('#loginform').click(function(){
     $('.modemode').css('display', 'none');
     $('.modelogin').css('display', 'block');
+    setTimeout(function () {
+        $('.modelogin').find('.first').focus();
+    }, 1);
     $('.login').fadeToggle('slow');
     $(this).toggleClass('green');
     var rect = $('#loginform')[0].getBoundingClientRect();
@@ -18,6 +21,9 @@ $('#loginform').click(function(){
 $('#registerform').click(function(){
     $('.modemode').css('display', 'none');
     $('.moderegister').css('display', 'block');
+    setTimeout(function () {
+        $('.moderegister').find('.first').focus();
+    }, 1);
     $('.login').fadeToggle('slow');
     $(this).toggleClass('green');
     var rect = $('#registerform')[0].getBoundingClientRect();
@@ -33,6 +39,10 @@ $register.find('.btn').click(function () {
         return alert('Boi u wrong aboot what? YOUR PASSSS IS NOT MATCH');
     }
     $register.submit();
+});
+
+$('#dashboardmywrap').find('.profilebtn').click(function () {
+    $('#profilepopup').css('display', 'block');
 });
 
 $(document).mouseup(function (e)

@@ -554,5 +554,21 @@ fb.ref(config.firebase.resourcePath).once('value', function (snap) {
     }
 });*/
 
+//Update poster ids
+/*
+fb.ref(config.firebase.userPath).once('value', function (snap) {
+    var users = snap.val();
+    var userIds = Object.keys(users);
+    fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+        var arr = snap.val();
+        var ids = Object.keys(arr);
+        for (var i = 0; i < ids.length; i++) {
+            fb.ref(config.firebase.recoveryPath + ids[i]).update({
+                poster: userIds[Math.floor(Math.random() * userIds.length)]
+            });
+        }
+    });
+});*/
+
 //Start web
 web.start();

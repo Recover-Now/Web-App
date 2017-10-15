@@ -23,4 +23,9 @@
     if (msg) {
         alert(msg);
     }
+
+    if (window.location.href.indexOf('dashboard.html') >= 0) {
+        $('#mywrap').css('display', 'none');
+        $('#dashboardmywrap').css('display', 'block').find('.profilebtn').html(serverData.firstName + ' ' + serverData.lastName + ' &#9660;');
+    }
 </script>
