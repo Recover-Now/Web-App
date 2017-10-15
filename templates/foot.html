@@ -26,6 +26,17 @@
 
     if (window.location.href.indexOf('dashboard.html') >= 0) {
         $('#mywrap').css('display', 'none');
-        $('#dashboardmywrap').css('display', 'block').find('.profilebtn').html(serverData.firstName + ' ' + serverData.lastName + ' &#9660;');
+        $('#dashboardmywrap').css('display', 'block').find('.profilebtn').find('.imgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
     }
+
+    function onWindowResize() {
+        if ($(window).width() <= 650) {
+            $('#mywrap').css('top', '0px');
+        } else {
+            $('#mywrap').css('top', '35px');
+        }
+    }
+    onWindowResize();
+    $(window).resize(onWindowResize);
+
 </script>
