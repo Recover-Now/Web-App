@@ -1,5 +1,6 @@
 {
   "port": 8083,
+  "islocal": true,
   "sessionExpire": 3600,
   "heapmapDataExpire": 1440,
   "forceReloadTemplates": true,
@@ -8,6 +9,8 @@
     "userPath": "/RNUser/",
     "resourcePath": "/RNResource/",
     "recoveryPath": "/RNRecoveryArea/",
-    "locationPath": "/RNLocation/"
+    "locationPath": "/RNLocation/",
+    "userResourceList": "/RNUserResourceList/",
+    "userRecoveryAreaList": "/RNUserRecoveryAreaList/"
   }
 }

@@ -27,11 +27,25 @@ var web;
     };
     loadTemplates();
 
+    var getIp = function (req) {
+        var ip = req.connection.remoteAddress;
+        if (ip == '::1' && config.islocal) {
+            ip = '128.61.7.129';
+        }
+        return ip;
+    };
+
     var app = require('express')();
     var http = require('http').Server(app);
     var io = require('socket.io')(http);
     var bodyParser = require('body-parser');
-    var session = require('express-session');
+    var session = require('express-session')({
+        secret: 'keyboard cat',
+        resave: true,
+        saveUninitialized: true,
+        cookie: {secure: false}
+    });
+    var sharedsession = require("express-socket.io-session");
     var formidable = require('formidable');
     var mime = require('mime');
     var geoip = require('geoip-lite');
@@ -39,12 +53,7 @@ var web;
     //Setup middleware
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
-    app.use(session({
-        secret: 'keyboard cat',
-        resave: false,
-        saveUninitialized: true,
-        cookie: {secure: false}
-    }));
+    app.use(session);
 
     var needAuth = ['/dashboard.html'];
 
@@ -69,11 +78,10 @@ var web;
             loadTemplates();
         }
 
-        console.log(url,lib.getIp(req));
-
         if (!session.geo) {
-            session.geo = geoip.lookup(lib.getIp(req));
-            console.log(session.geo);
+            var geo = geoip.lookup(getIp(req));
+            console.log(geo);
+            session.geo = geo.country + '-' + geo.region + '-' + geo.city;
         }
 
         sess.verifySession(session.ourId, function (uid) {
@@ -251,8 +259,26 @@ var web;
         })
     });
 
+    var sendResources = function (socket) {
+
+    };
+
+    io.use(sharedsession(session, {
+        autoSave:true
+    }));
+
     io.on('connection', function (socket) {
         socket.join('myroom');
+
+        socket.on('dashboard', function () {
+            var session = socket.handshake.session;
+
+            recover.getResources(session.geo, function (data) {
+                socket.emit('resources', data);
+            });
+
+            console.log(session.geo);
+        });
 
         recover.getHeatmapData(function (array) {
             socket.emit('heatmapData', array);
@@ -414,6 +440,17 @@ var fb;
             path = formatFilePath(path);
             return bucket.file(path).createReadStream();
         },
+        fileExists: function (path, callback) {
+            path = formatFilePath(path);
+            bucket.file(path).exists(function (err, data) {
+                if (err) {
+                    console.trace(err);
+                    return callback(false);
+                }
+
+                callback(data);
+            });
+        },
         emailToUser: function (email, callback) {
             firebase.auth().getUserByEmail(email).then(function (data) {
                 callback({uid: data.uid});
@@ -464,9 +501,61 @@ var recover;
         return map;
     };
 
+    var fillPosterInfo = function (data, callback) {
+        var poster = data.poster;
+        fb.ref(config.firebase.userPath + poster).once('value', function (snap) {
+            var val = snap.val();
+            data.posterName = val.firstName + ' ' + val.lastName;
+            data.posterEmail = val.email;
+            data.posterPhone = val.phoneNumber;
+
+            fb.fileExists(config.firebase.userPath + poster, function (exists) {
+                data.hasProfilePic = exists;
+                callback(data);
+            });
+        })
+    };
+
+    var formatLocationData = function (data, callback) {
+        var resp = {
+            resources: {},
+            recoveryAreas: {}
+        };
+        var keys = Object.keys(data.resources);
+        var proms = [];
+        for (var i = 0; i < keys.length; i++) {
+            const id = keys[i];
+            proms.push(new Promise(function (resolve, reject) {
+                fb.ref(config.firebase.resourcePath + id).once('value', function (snap) {
+                    fillPosterInfo(snap.val(), function (data) {
+                        resp.resources[id] = data;
+                        resolve();
+                    });
+                });
+            }));
+        }
+        keys = Object.keys(data.recoveryAreas);
+        for (var i = 0; i < keys.length; i++) {
+            const id = keys[i];
+            proms.push(new Promise(function (resolve, reject) {
+                fb.ref(config.firebase.recoveryPath + id).once('value', function (snap) {
+                    fillPosterInfo(snap.val(), function (data) {
+                        resp.recoveryAreas[id] = data;
+                        resolve();
+                    });
+                });
+            }));
+        }
+        Promise.all(proms).then(function () {
+            callback(resp);
+        });
+    };
+
     fb.ref(config.firebase.userPath).on('value', function (snap) {
         web.broadcastHeatmapData(formatHeatmapData(snap.val()));
     });
+
+    var resourceListeners = [];
 
     recover = {
         addResource: function (uid, cityId, title, content, category) {
@@ -508,6 +597,23 @@ var recover;
             fb.ref(config.firebase.userPath).once('value', function (snap) {
                 callback(formatHeatmapData(snap.val()));
             });
+        },
+        getResources: function (cityId, callback) {
+            if (resourceListeners.indexOf(cityId) < 0) {
+
+            }
+
+            fb.ref(config.firebase.locationPath + cityId).once('value', function (snap) {
+                var val = snap.val();
+                if (!val) {
+                    return callback({
+                        resources: {},
+                        recoveryAreas: {}
+                    });
+                }
+
+                formatLocationData(val, callback);
+            })
         }
     };
 })();
@@ -577,6 +683,26 @@ fb.ref(config.firebase.userPath).once('value', function (snap) {
         }
     });
 });*/
+
+//Fetch user with email
+/*
+fb.ref(config.firebase.userPath).once('value', function (snap) {
+    var users = snap.val();
+    var userIds = Object.keys(users);
+    for (var i = 0; i < userIds.length; i++) {
+        var userId = userIds[i];
+        if (users[userId].email == 'test@test.com') {
+            console.log(userId);
+        }
+    }
+});
+*/
+
+/*
+fb.ref(config.firebase.userRecoveryAreaList + 'Rnod84WXCUM1WNOF91lMDhNaXc72').set({
+    'CgjYIMd662bwXCiy4jG4': true
+});
+*/
 
 //Start web
 web.start();
