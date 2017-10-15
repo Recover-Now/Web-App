@@ -24,15 +24,25 @@ socket.on('heatmapData', function (map) {
 });
 
 var heatmap;
+var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var labelIndex = 0;
 
 function initMap() {
-    var sanFrancisco = new google.maps.LatLng(37.774546, -100.433523);
+    var sanFrancisco = new google.maps.LatLng(37.774546, -120.433523);
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: sanFrancisco,
         zoom: 4,
         mapTypeId: 'satellite'
     });
+    
+    var marker = new google.maps.Marker({
+                                        position: sanFrancisco,
+                                        map: map,
+                                        label: labels[labelIndex++ % labels.length],
+                                        title: 'Hello World!'
+                                        });
+     
 
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: []
