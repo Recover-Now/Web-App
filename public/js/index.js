@@ -24,15 +24,35 @@ socket.on('heatmapData', function (map) {
 });
 
 var heatmap;
+var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var labelIndex = 0;
+
+
 
 function initMap() {
-    var sanFrancisco = new google.maps.LatLng(37.774546, -100.433523);
+  
+           
+    var sanFrancisco = new google.maps.LatLng(37.774546, -120.433523);
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: sanFrancisco,
         zoom: 4,
         mapTypeId: 'satellite'
     });
+    
+    var infowindow = new google.maps.InfoWindow({
+                                                content: "RedCross Relief Tent"
+                                                });
+    
+    var marker = new google.maps.Marker({
+                                        position: sanFrancisco,
+                                        map: map,
+                                        title: 'Uluru (Ayers Rock)'
+                                        });
+    marker.addListener('click', function() {
+                       infowindow.open(map, marker);
+                       });
+     
 
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: []
