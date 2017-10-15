@@ -61,9 +61,17 @@ var web;
         var email = req.query.email;
         fb.emailToUser(email, function (data) {
             if (data.err) {
-                res.send('Invalid email');
+                fb.getFileStream('/defaultProfilePic.png').pipe(res);
+                //res.send('Invalid email');
             } else {
-                fb.getFileStream(config.firebase.userPath + data.uid).pipe(res);
+                var path = config.firebase.userPath + data.uid;
+                fb.fileExists(path, function (exists) {
+                    if (exists) {
+                        fb.getFileStream(path).pipe(res);
+                    } else {
+                        fb.getFileStream('/defaultProfilePic.png').pipe(res);
+                    }
+                });
             }
         });
     });
@@ -917,77 +925,43 @@ var test;
                     }
                 }
             });
+        },
+        updateResourceText: function () {
+            var msgs = {
+                0: ["I have %x% spots left in my house", "Come crash on my couch! Room for %x% people"],
+                1: ["I have extra food if anyone needs it", "Lots of extra water, let me know if you need any"],
+                2: ["I am a doctor and am willing to help anyone in need of medical assistance"],
+                3: ["I have lots of extra clothing"],
+                4: ["I can drive anyone anywhere if they need help!"]
+            };
+            var titles = {
+                0: ["House space"],
+                1: ["Extra food/water"],
+                2: ["Medical help"],
+                3: ["Free clothes"],
+                4: ["Car rides available"]
+            };
+
+            fb.ref(config.firebase.resourcePath).once('value', function (snap) {
+                var items = snap.val();
+                var keys = Object.keys(items);
+                for (var i = 0; i < keys.length; i++) {
+                    var category = i % 5;
+                    var mm = msgs[category];
+                    var tt = titles[category];
+                    var id = keys[i];
+                    fb.ref(config.firebase.resourcePath + id).update({
+                        category: category,
+                        title: tt[Math.floor(Math.random() * tt.length)].replace(/%x%/g, (Math.floor(Math.random() * 7) + 2) + ''),
+                        content: mm[Math.floor(Math.random() * mm.length)].replace(/%x%/g, (Math.floor(Math.random() * 7) + 2) + '')
+                    });
+                }
+            })
         }
     };
 
 })();
 
-/*
- for (var i = 0; i < 5; i++) {
- recover.addResource('POSTER_' + lib.randomString(10),
- 'US-GA-Atlanta',
- 'TITLE_' + lib.randomString(5),
- 'CONTENT_' + lib.randomString(5),
- Math.floor(Math.random() * 5));
- recover.addRecoveryArea('POSTER_' + lib.randomString(10),
- 'US-GA-Atlanta',
- 'TITLE_' + lib.randomString(5),
- 'CONTENT_' + lib.randomString(5));
- }
- */
-/*
- for (var i = 0; i < 900; i++) {
- fb.getUniqueKey(28, config.firebase.userPath, function (uid) {
- fb.ref(config.firebase.userPath + uid).set({
- email: 'boi@boi.boi',
- firstName: 'boi',
- lastName: 'boi',
- helpRequest: 0,
- phoneNumber: '123456790'
- });
- });
- }*/
-
-
-/*
- fb.ref(config.firebase.userPath).once('value', function (snap) {
- var users = snap.val();
- var userIds = Object.keys(users);
- for (var i = 0; i < userIds.length; i++) {
- var latlng = randomLatLng();
- recover.updateHelpRequest(userIds[i], latlng.latitude, latlng.longitude);
- }
- });*/
-/*
- fb.ref(config.firebase.resourcePath).once('value', function (snap) {
- var arr = snap.val();
- var ids = Object.keys(arr);
- for (var i = 0; i < ids.length; i++) {
- fb.ref(config.firebase.resourcePath + ids[i]).update(randomLatLng());
- }
- });*/
-
-//Update poster ids
-/*
- fb.ref(config.firebase.userPath).once('value', function (snap) {
- var users = snap.val();
- var userIds = Object.keys(users);
- fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
- var arr = snap.val();
- var ids = Object.keys(arr);
- for (var i = 0; i < ids.length; i++) {
- fb.ref(config.firebase.recoveryPath + ids[i]).update({
- poster: userIds[Math.floor(Math.random() * userIds.length)]
- });
- }
- });
- });*/
-
-/*
- fb.ref(config.firebase.userRecoveryAreaList + 'Rnod84WXCUM1WNOF91lMDhNaXc72').set({
- 'CgjYIMd662bwXCiy4jG4': true
- });
- */
 
 //Start web
 web.start();

@@ -40,7 +40,7 @@ socket.on('resources', function (data) {
         $text.append('<div class="poster">' + item.posterName + '<br>' + item.posterPhone + '</div>');
         $text.append('<div class="posterimg"><img src="/profilepic?email=' + item.posterEmail + '"/></div>');
         if (!item.hasProfilePic) {
-            $text.find('.posterimg').css('visibility', 'hidden');
+            //$text.find('.posterimg').css('visibility', 'hidden');
         }
         $div.append($text);
         $resourceswrap.append($div);
