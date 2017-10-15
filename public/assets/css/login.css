@@ -30,8 +30,8 @@
     position: absolute;
     right: 0;
     top: 50px;
-    width: 200px;
-    height: 100px;
+    width: 320px;
+    height: 140px;
     background: white;
     border: 1px solid rgba(0,0,0,.2);
     box-shadow: 0 2px 10px rgba(0,0,0,.2);
@@ -49,15 +49,64 @@
     top: -10px;
 }
 
-#profilepopup .profilearrow2 {
-    width: 0;
-    height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 15px solid rgba(0,0,0,.2);
-    right: 3px;
+#profilepopup .bigpic {
     position: absolute;
-    top: -10px;
+    left: 0;
+    top: 0;
+    width: 140px;
+    height: 140px;
+}
+
+#profilepopup .rightinfo {
+    position: absolute;
+    left: 140px;
+    top: 0;
+    width: calc(100% - 140px);
+    height: 140px;
+    padding: 15px 0;
+}
+
+#profilepopup .rightinfo .myname {
+    font-weight: bold;
+    color: black;
+}
+
+#profilepopup .rightinfo .mybtn {
+    background: #ff799e;
+    display: inline-block;
+    border-radius: 5px;
+    color: white;
+    cursor: default;
+    font-weight: bold;
+    width: 72px;
+    height: 30px;
+    text-align: center;
+    padding-top: 4px;
+    margin-top: 20px;
+}
+
+#profilepopup .rightinfo .logout.mybtn {
+    margin-left: 10px;
+}
+
+#profilepopup .rightinfo .mybtn:hover {
+    background: #f94d7d;
+}
+
+#profilepopup .bigpic .bigimgwrap {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+#profilepopup .bigpic .bigimgwrap img {
+    width: 100%;
+    height: 100%;
 }
 
 .modemode form {

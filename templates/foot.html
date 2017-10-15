@@ -53,7 +53,6 @@
                                     $target.attr('tabindex', '-1'); // Adding tabindex for elements not focusable
                                     $target.focus(); // Set focus again
                                 }
-                                ;
                             });
                         }
                     }
@@ -67,12 +66,15 @@
 
     if (window.location.href.indexOf('dashboard.html') >= 0) {
         $('#mywrap').css('display', 'none');
-        $('#dashboardmywrap').css('display', 'block').find('.profilebtn').html(serverData.firstName + ' ' + serverData.lastName + ' &#9660;');
-    }
-
-    if (window.location.href.indexOf('dashboard.html') >= 0) {
-        $('#mywrap').css('display', 'none');
         $('#dashboardmywrap').css('display', 'block').find('.profilebtn').find('.imgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
+        $('#dashboardmywrap').find('.bigimgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
+        var $rightinfo = $('#dashboardmywrap').find('.rightinfo');
+        $rightinfo.find('.myname').html(serverData.firstName + ' ' + serverData.lastName);
+        $rightinfo.find('.myemail').html(serverData.email);
+
+        $('#thelogoutbutton').click(function () {
+            $('#logoutform').submit();
+        })
     }
 
     function onWindowResize() {
