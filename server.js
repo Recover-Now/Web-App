@@ -28,7 +28,7 @@ var web;
     loadTemplates();
 
     var getIp = function (req) {
-        var ip = req.headers['x-forwarded-for'];
+        var ip = req.headers['x-real-ip'];
         if (ip) {
             return ip;
         }
