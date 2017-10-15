@@ -728,7 +728,7 @@ var test;
         });
     };
 
-    var randomLatLng = function () {
+    var puertoRicoLatLng = function () {
         var xmin = 18.036198;
         var xmax = 18.430108;
         var ymin = -67.147064;
@@ -742,6 +742,23 @@ var test;
             longitude: y,
         };
     };
+
+    var atlantaLatLng = function () {
+        var xmin = -84.486923;
+        var xmax = -84.258957;
+        var ymin = 33.655781;
+        var ymax = 33.904616;
+
+        var x = xmin + (xmax - xmin) * Math.random();
+        var y = ymin + (ymax - ymin) * Math.random();
+
+        return {
+            latitude: y,
+            longitude: x,
+        };
+    };
+
+    var randomLatLng = atlantaLatLng;
 
     test = {
         getUidFromEmail: function (email, callback) {
@@ -819,6 +836,19 @@ var test;
                 }
             })
         },
+        updateResourceLatLng: function (cityIdEnd) {
+            fb.ref(config.firebase.resourcePath).once('value', function (snap) {
+                var val = snap.val();
+                var keys = Object.keys(val);
+                for (var i = 0; i < keys.length; i++) {
+                    var area = val[keys[i]];
+                    if (area.cityId.endsWith(cityIdEnd)) {
+                        var latlng = randomLatLng();
+                        fb.ref(config.firebase.resourcePath + keys[i]).update(latlng);
+                    }
+                }
+            })
+        },
         updateUserHelpRequest: function (emailEnd) {
             getUsers(function (users, userIds) {
                 for (var i = 0; i < userIds.length; i++) {
@@ -833,7 +863,6 @@ var test;
         }
     };
 
-    test.updateUserHelpRequest('puerto.rico');
 })();
 
 /*

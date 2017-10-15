@@ -6,11 +6,11 @@ var socket = io();
 socket.emit('dashboard', true);
 
 var pics = {
-    0: 'pics/foodwater.png',
+    0: 'pics/Housing.png',
     1: 'pics/foodwater.png',
-    2: 'pics/foodwater.png',
-    3: 'pics/foodwater.png',
-    4: 'pics/foodwater.png'
+    2: 'pics/Medical.png',
+    3: 'pics/Clothing.png',
+    4: 'pics/Rides.png'
 };
 
 socket.on('resources', function (data) {
