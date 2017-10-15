@@ -23,6 +23,7 @@ socket.on('heatmapData', function (map) {
 
 socket.on('recoveryAreas', function (array) {
     console.log('recov',array);
+          
     for (var i = 0; i < array.length; i++) {
         var area = array[i];
 
