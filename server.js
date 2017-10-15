@@ -100,7 +100,10 @@ var web;
         }
 
         if (!session.geo) {
-            var geo = geoip.lookup(getIp(req));
+            var ip = getIp(req);
+            console.log('ip',ip);
+            var geo = geoip.lookup(ip);
+            console.log('geo',geo);
             if (geo) {
                 session.geo = geo.country + '-' + geo.region + '-' + geo.city;
             }
