@@ -1,5 +1,5 @@
 {
-  "port": 2251,
+  "port": 8083,
   "sessionExpire": 3600,
   "heapmapDataExpire": 1440,
   "forceReloadTemplates": true,

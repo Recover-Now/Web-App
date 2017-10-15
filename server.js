@@ -34,6 +34,7 @@ var web;
     var session = require('express-session');
     var formidable = require('formidable');
     var mime = require('mime');
+    var geoip = require('geoip-lite');
 
     //Setup middleware
     app.use(bodyParser.urlencoded({extended: true}));
@@ -66,6 +67,13 @@ var web;
 
         if (config.forceReloadTemplates) {
             loadTemplates();
+        }
+
+        console.log(url,lib.getIp(req));
+
+        if (!session.geo) {
+            session.geo = geoip.lookup(lib.getIp(req));
+            console.log(session.geo);
         }
 
         sess.verifySession(session.ourId, function (uid) {
@@ -104,7 +112,7 @@ var web;
                         for (var i = 0; i < keys.length; i++) {
                             dat = dat.replace(new RegExp(keys[i], 'g'), templates[keys[i]]);
                         }
-                        res.setHeader('Content-Type', mime.lookup(path));
+                        res.setHeader('Content-Type', mime.getType(path));
                         res.send(dat);
                     } else {
                         res.sendFile(path);
