@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <title>My Profile</title>
+    <link rel="stylesheet" type="text/css" href="css/profile.css">
+    %HEAD%
+</head>
+<body>
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Main -->
+    <div id="main">
+        <div class="inner">
+
+            %HEADER%
+
+            <!-- Content -->
+            <section>
+                <header class="main">
+                    <h1>Profile</h1>
+                </header>
+
+                <div id="mystuff">
+                    <form action="/updateinfo" method="post">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div class="mylabel">First Name</div>
+                                    <div class="myinp"><input type="text" id="firstName" name="fname"/></div>
+                                </td>
+                                <td>
+                                    <div class="mylabel">Last Name</div>
+                                    <div class="myinp"><input type="text" id="lastName" name="lname"/></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="mylabel">Phone Number</div>
+                                    <div class="myinp"><input type="text" id="phoneNumber" name="phone"/></div>
+                                </td>
+                                <td align="center">
+                                    <input id="saveChangesBtn" type="submit" value="Save Changes"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+
+                    <hr class="major"/>
+
+                    <form id="changePassForm" action="/changepass" method="post">
+                        <div class="mylabel">Current Password</div>
+                        <div class="myinp"><input id="oldPassword" type="password" name="oldpassword"/></div>
+                        <div class="mylabel">New Password</div>
+                        <div class="myinp"><input id="newPassword" type="password" name="newpassword"/></div>
+                        <div class="mylabel">Confirm Password</div>
+                        <div class="myinp"><input id="newCPassword" type="password"/></div>
+                        <br>
+                        <input id="changePassBtn" type="button" value="Update Password"/>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    %SIDEBARDASH%
+
+</div>
+
+<script>
+    var serverData = '%SERVERDATA%';
+    if (serverData.toLowerCase() != '%serverdata%') {
+        serverData = JSON.parse(serverData);
+    } else {
+        serverData = {};
+    }
+</script>
+
+%FOOT%
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

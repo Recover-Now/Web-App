@@ -64,14 +64,21 @@
         alert(msg);
     }
 
-    if (window.location.href.indexOf('dashboard.html') >= 0) {
+    var inAuth = ['dashboard.html', 'profile.html'];
+    var areWeInAuth = false;
+    for (var i = 0; i < inAuth.length; i++) {
+        if (window.location.href.indexOf(inAuth[i]) >= 0) {
+            areWeInAuth = true;
+        }
+    }
+    if (areWeInAuth) {
         $('#mywrap').css('display', 'none');
         $('#dashboardmywrap').css('display', 'block').find('.profilebtn').find('.imgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
         $('#dashboardmywrap').find('.bigimgwrap').html('<img src="/profilepic?email=' + serverData.email + '"/>');
         var $rightinfo = $('#dashboardmywrap').find('.rightinfo');
         $rightinfo.find('.myname').html(serverData.firstName + ' ' + serverData.lastName);
         $rightinfo.find('.myemail').html(serverData.email);
-
+        $rightinfo.find('.myphone').html(serverData.phoneNumber);
         $('#thelogoutbutton').click(function () {
             $('#logoutform').submit();
         })

@@ -55,7 +55,7 @@ var web;
     app.use(bodyParser.json());
     app.use(session);
 
-    var needAuth = ['/dashboard.html'];
+    var needAuth = ['/dashboard.html', '/profile.html'];
 
     app.get('/profilepic', function (req, res) {
         var email = req.query.email;
@@ -80,8 +80,9 @@ var web;
 
         if (!session.geo) {
             var geo = geoip.lookup(getIp(req));
-            console.log(geo);
-            session.geo = geo.country + '-' + geo.region + '-' + geo.city;
+            if (geo) {
+                session.geo = geo.country + '-' + geo.region + '-' + geo.city;
+            }
         }
 
         sess.verifySession(session.ourId, function (uid) {
@@ -100,13 +101,16 @@ var web;
                 path = __dirname + '/public/err404.html';
             }
 
+            var replaceUserInfo = function (str, callback) {
+                fb.ref(config.firebase.userPath + uid ).once('value', function (snap) {
+                    str = str.replace(/%SERVERDATA%/g, JSON.stringify(snap.val()));
+                    callback(str);
+                });
+            };
+
             var replace = {
-                '/dashboard.html': function (str, callback) {
-                    fb.ref(config.firebase.userPath + uid ).once('value', function (snap) {
-                        str = str.replace(/%SERVERDATA%/g, JSON.stringify(snap.val()));
-                        callback(str);
-                    });
-                }
+                '/dashboard.html': replaceUserInfo,
+                '/profile.html': replaceUserInfo
             };
 
             fs.readFile(path, 'utf8', function (err, data) {
@@ -228,6 +232,68 @@ var web;
         res.redirect('/index.html');
     });
 
+    app.post('/updateinfo', function (req, res) {
+        var session = req.session;
+
+        var firstName = req.body.fname;
+        var lastName = req.body.lname;
+        var phone = req.body.phone;
+
+        var resolve = function (msg) {
+            res.redirect('/profile.html?msg=' + msg);
+        };
+
+        if (!firstName || firstName.length == 0) {
+            return resolve('First name cannot be left blank');
+        }
+
+        if (!lastName || lastName.length == 0) {
+            return resolve('Last name cannot be left blank');
+        }
+
+        if (!phone || phone.length == 0) {
+            return resolve('Phone number cannot be left blank');
+        }
+
+        sess.verifySession(session.ourId, function (uid) {
+            if (!uid) {
+                return res.redirect('/index.html');
+            }
+
+            fb.ref(config.firebase.userPath + uid).update({
+                firstName: firstName,
+                lastName: lastName,
+                phoneNumber: phone
+            });
+
+            return res.redirect('/profile.html?msg=Updated Successfully');
+        });
+    });
+
+    app.post('/changepass', function (req, res) {
+        var session = req.session;
+
+        var oldPass = req.body.oldpassword;
+        var newPass = req.body.newpassword;
+
+        sess.verifySession(session.ourId, function (uid) {
+            if (!uid) {
+                return res.redirect('/index.html');
+            }
+
+            fb.ref(config.firebase.userPath + uid).once('value', function (snap) {
+                var val = snap.val();
+                fb.updatePass(val.email, oldPass, newPass, function (data) {
+                    if (data.success) {
+                        return res.redirect('/profile.html?msg=Updated password successfully');
+                    } else {
+                        return res.redirect('/profile.html?msg=' + data.err);
+                    }
+                });
+            });
+        });
+    });
+
     app.post('/addresource', function (req, res) {
         var session = req.session;
 
@@ -259,10 +325,6 @@ var web;
         })
     });
 
-    var sendResources = function (socket) {
-
-    };
-
     io.use(sharedsession(session, {
         autoSave:true
     }));
@@ -276,8 +338,6 @@ var web;
             recover.getResources(session.geo, function (data) {
                 socket.emit('resources', data);
             });
-
-            console.log(session.geo);
         });
 
         recover.getHeatmapData(function (array) {
@@ -421,6 +481,22 @@ var fb;
             }, function (err) {
                 console.trace('loginError', err);
                 callback({err: err});
+            });
+        },
+        updatePass: function (email, oldPass, newPass, callback) {
+            console.log(email,oldPass);
+            client.auth().signInWithEmailAndPassword(email, oldPass).then(function (data) {
+                client.auth().currentUser.updatePassword(newPass).then(function (data) {
+                    callback({success: true});
+                }, function (err) {
+                    console.trace(err);
+                    callback({err: err});
+                });
+            }, function (err) {
+                callback({err: 'Wrong old password'});
+            }).catch(function (err) {
+                console.trace(err);
+                callback({err: 'Wrong old password'});
             });
         },
         ref: function (path) {
@@ -618,6 +694,125 @@ var recover;
     };
 })();
 
+//Sample data generator
+var test;
+(function () {
+    var getUsers = function (callback) {
+        fb.ref(config.firebase.userPath).once('value', function (snap) {
+            var users = snap.val();
+            var userIds = Object.keys(users);
+            callback(users, userIds);
+        });
+    };
+
+    var randomLatLng = function () {
+        var xmin = 18.036198;
+        var xmax = 18.430108;
+        var ymin = -67.147064;
+        var ymax = -65.782571;
+
+        var x = xmin + (xmax - xmin) * Math.random();
+        var y = ymin + (ymax - ymin) * Math.random();
+
+        return {
+            latitude: x,
+            longitude: y,
+        };
+    };
+
+    test = {
+        getUidFromEmail: function (email, callback) {
+            getUsers(function (users, userIds) {
+                for (var i = 0; i < userIds.length; i++) {
+                    var userId = userIds[i];
+                    if (users[userId].email == email) {
+                        return callback(userId);
+                    }
+                }
+            });
+        },
+        createUser: function (email, firstName, lastName, phoneNumber, callback) {
+            var latlng = randomLatLng();
+            fb.getUniqueKey(28, config.firebase.userPath, function (uid) {
+                fb.ref(config.firebase.userPath + uid).update({
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    phoneNumber: phoneNumber,
+                    helpRequest: 0,
+                    latitude: latlng.latitude,
+                    longitude: latlng.longitude
+                });
+                callback(uid);
+            });
+        },
+        createUsers: function (emailEnd, firstName, lastName, minI, maxI) {
+            for (var i = minI; i < maxI; i++) {
+                test.createUser('user' + i + '@' + emailEnd, firstName, lastName + i, '1234567890', function (uid) {
+                    console.log(uid);
+                });
+            }
+        },
+        addRecoverAreas: function (emailEnd, num, cityId) {
+            getUsers(function (users, userIds) {
+                var cur = 0;
+                while (cur < num) {
+                    for (var i = 0; i < userIds.length && cur < num; i++) {
+                        var userId = userIds[i];
+                        var user = users[userId];
+                        if (user.email.endsWith('@' + emailEnd)) {
+                            recover.addRecoveryArea(userId, cityId, 'TITLE_' + lib.randomString(5), 'CONTENT_' + lib.randomString(5));
+                            cur++;
+                        }
+                    }
+                }
+            });
+        },
+        addResources: function (emailEnd, num, cityId) {
+            getUsers(function (users, userIds) {
+                var cur = 0;
+                while (cur < num) {
+                    for (var i = 0; i < userIds.length && cur < num; i++) {
+                        var userId = userIds[i];
+                        var user = users[userId];
+                        if (user.email.endsWith('@' + emailEnd)) {
+                            recover.addResource(userId, cityId, 'TITLE_' + lib.randomString(5), 'CONTENT_' + lib.randomString(5), Math.floor(Math.random() * 5));
+                            cur++;
+                        }
+                    }
+                }
+            });
+        },
+        updateRecoveryAreaLatLng: function (cityIdEnd) {
+            fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+                var val = snap.val();
+                var keys = Object.keys(val);
+                for (var i = 0; i < keys.length; i++) {
+                    var area = val[keys[i]];
+                    if (area.cityId.endsWith(cityIdEnd)) {
+                        var latlng = randomLatLng();
+                        fb.ref(config.firebase.recoveryPath + keys[i]).update(latlng);
+                    }
+                }
+            })
+        },
+        updateUserHelpRequest: function (emailEnd) {
+            getUsers(function (users, userIds) {
+                for (var i = 0; i < userIds.length; i++) {
+                    var userId = userIds[i];
+                    var user = users[userId];
+                    if (user.email.endsWith('@' + emailEnd)) {
+                        var latlng = randomLatLng();
+                        recover.updateHelpRequest(userId, latlng.latitude, latlng.longitude);
+                    }
+                }
+            });
+        }
+    };
+
+    test.updateUserHelpRequest('puerto.rico');
+})();
+
 /*
 for (var i = 0; i < 5; i++) {
     recover.addResource('POSTER_' + lib.randomString(10),
@@ -644,12 +839,7 @@ for (var i = 0; i < 900; i++) {
     });
 }*/
 
-function randomLatLng() {
-    return {
-        latitude: 33.748995 - Math.pow(Math.random()*1-.5, 3),
-        longitude: -84.387982 + Math.pow(Math.random()*1-.5, 3)
-    };
-}
+
 /*
 fb.ref(config.firebase.userPath).once('value', function (snap) {
     var users = snap.val();
@@ -683,20 +873,6 @@ fb.ref(config.firebase.userPath).once('value', function (snap) {
         }
     });
 });*/
-
-//Fetch user with email
-/*
-fb.ref(config.firebase.userPath).once('value', function (snap) {
-    var users = snap.val();
-    var userIds = Object.keys(users);
-    for (var i = 0; i < userIds.length; i++) {
-        var userId = userIds[i];
-        if (users[userId].email == 'test@test.com') {
-            console.log(userId);
-        }
-    }
-});
-*/
 
 /*
 fb.ref(config.firebase.userRecoveryAreaList + 'Rnod84WXCUM1WNOF91lMDhNaXc72').set({

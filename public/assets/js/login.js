@@ -36,7 +36,7 @@ $register.find('.btn').click(function () {
     var pass = $register.find('.pass').val();
     var cpass = $register.find('.cpass').val();
     if (pass != cpass) {
-        return alert('Boi u wrong aboot what? YOUR PASSSS IS NOT MATCH');
+        return alert('Passwords do not match');
     }
     $register.submit();
 });
