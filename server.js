@@ -148,30 +148,9 @@ var web;
 
                     new Promise(function (resolve, reject) {
                         if (areaId) {
-                            fb.ref(config.firebase.locationCheckIn + areaId).once('value', function (snap) {
-                                var users = snap.val();
-                                if (!users) {
-                                    return resolve();
-                                }
-                                var userIds = Object.keys(users);
-
-                                var proms = [];
-                                for (var i = 0; i < userIds.length; i++) {
-                                    const userId = userIds[i];
-                                    proms.push(new Promise(function (resolve, reject) {
-                                        fb.ref(config.firebase.userPath + userId).once('value', function (snap) {
-                                            var user = snap.val();
-                                            checks.push({
-                                                email: user.email,
-                                                firstName: user.firstName,
-                                                lastName: user.lastName,
-                                                phoneNumber: user.phoneNumber
-                                            });
-                                            resolve();
-                                        });
-                                    }));
-                                }
-                                Promise.all(proms).then(resolve, resolve);
+                            recover.getCheckins(areaId, function (dat) {
+                                checks = dat;
+                                resolve();
                             });
                         } else {
                             resolve();
@@ -418,6 +397,10 @@ var web;
             });
         });
 
+        socket.on('checkin', function (areaId) {
+            socket.join('checkin' + areaId);
+        });
+
         fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
             var areas = snap.val();
             var keys = Object.keys(areas);
@@ -451,6 +434,9 @@ var web;
         broadcastHeatmapData: function (map) {
             latestHeatmapData = map;
             heatmapDataUpdated = true;
+        },
+        broadcastCheckinData: function (areaId, checks) {
+            io.to('checkin' + areaId).emit('checkins', checks);
         }
     };
 })();
@@ -636,6 +622,24 @@ var fb;
         }
     };
 
+    //Listen to checkin changes
+    var checkinListen = [];
+    fb.ref(config.firebase.locationCheckIn).on('value', function (snap) {
+        var areas = snap.val();
+        var areaIds = Object.keys(areas);
+        for (var i = 0; i < areaIds.length; i++) {
+            const areaId = areaIds[i];
+            if (checkinListen.indexOf(areaId) < 0) {
+                checkinListen.push(areaId);
+                fb.ref(config.firebase.locationCheckIn + areaId).on('value', function (snap) {
+                    recover.getCheckins(areaId, function (checks) {
+                        web.broadcastCheckinData(areaId, checks);
+                    });
+                })
+            }
+        }
+    });
+
     //Clear all old sessions
     fb.ref('/RFSession').remove();
 })();
@@ -778,6 +782,39 @@ var recover;
 
                 formatLocationData(val, callback);
             })
+        },
+        getCheckins: function (areaId, callback) {
+            var checks = [];
+
+            var resolve = function () {
+                callback(checks);
+            };
+
+            fb.ref(config.firebase.locationCheckIn + areaId).once('value', function (snap) {
+                var users = snap.val();
+                if (!users) {
+                    return resolve();
+                }
+                var userIds = Object.keys(users);
+
+                var proms = [];
+                for (var i = 0; i < userIds.length; i++) {
+                    const userId = userIds[i];
+                    proms.push(new Promise(function (resolve, reject) {
+                        fb.ref(config.firebase.userPath + userId).once('value', function (snap) {
+                            var user = snap.val();
+                            checks.push({
+                                email: user.email,
+                                firstName: user.firstName,
+                                lastName: user.lastName,
+                                phoneNumber: user.phoneNumber
+                            });
+                            resolve();
+                        });
+                    }));
+                }
+                Promise.all(proms).then(resolve, resolve);
+            });
         }
     };
 })();
@@ -961,7 +998,6 @@ var test;
     };
 
 })();
-
 
 //Start web
 web.start();
