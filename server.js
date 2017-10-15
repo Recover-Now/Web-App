@@ -68,6 +68,19 @@ var web;
         });
     });
 
+    app.get('/apple-app-site-association', function (req, res) {
+        var url = req.url.split('?')[0];
+        if (url === '/')url += 'index.html';
+        var path = __dirname + '/public/' + url;
+        try {
+            fs.accessSync(path, fs.F_OK);
+        } catch (e) {
+            path = __dirname + '/public/err404.html';
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.sendFile(path);
+    });
+
     app.get('*', function (req, res) {
         var session = req.session;
 
