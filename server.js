@@ -114,9 +114,17 @@ var web;
                 path = __dirname + '/public/err404.html';
             }
 
-            var replaceUserInfo = function (str, callback) {
-                fb.ref(config.firebase.userPath + uid ).once('value', function (snap) {
-                    str = str.replace(/%SERVERDATA%/g, JSON.stringify(snap.val()));
+            var replaceUserInfo = function (str, callback, moreJson) {
+                fb.ref(config.firebase.userPath + uid).once('value', function (snap) {
+                    var json = snap.val();
+                    json.authenticated = true;
+                    if (moreJson) {
+                        var keys = Object.keys(moreJson);
+                        for (var i = 0; i < keys.length; i++) {
+                            json[keys[i]] = moreJson[keys[i]];
+                        }
+                    }
+                    str = str.replace(/%SERVERDATA%/g, JSON.stringify(json));
                     callback(str);
                 });
             };
@@ -124,7 +132,55 @@ var web;
             var replace = {
                 '/dashboard.html': replaceUserInfo,
                 '/profile.html': replaceUserInfo,
-                '/recoveryAreas.html': replaceUserInfo
+                '/recoveryAreas.html': replaceUserInfo,
+                '/checkinList.html': function (str, callback) {
+                    var areaId = req.query.recoveryArea;
+
+                    var checks = [];
+
+                    new Promise(function (resolve, reject) {
+                        if (areaId) {
+                            fb.ref(config.firebase.locationCheckIn + areaId).once('value', function (snap) {
+                                var users = snap.val();
+                                if (!users) {
+                                    return resolve();
+                                }
+                                var userIds = Object.keys(users);
+
+                                var proms = [];
+                                for (var i = 0; i < userIds.length; i++) {
+                                    const userId = userIds[i];
+                                    proms.push(new Promise(function (resolve, reject) {
+                                        fb.ref(config.firebase.userPath + userId).once('value', function (snap) {
+                                            var user = snap.val();
+                                            checks.push({
+                                                email: user.email,
+                                                firstName: user.firstName,
+                                                lastName: user.lastName,
+                                                phoneNumber: user.phoneNumber
+                                            });
+                                            resolve();
+                                        });
+                                    }));
+                                }
+                                Promise.all(proms).then(resolve, resolve);
+                            });
+                        } else {
+                            resolve();
+                        }
+                    }).then(function () {
+                        var moreJson = {
+                            authenticated: !!uid,
+                            checkins: checks
+                        };
+                        if (uid) {
+                            replaceUserInfo(str, callback, moreJson);
+                        } else {
+                            str = str.replace(/%SERVERDATA%/g, JSON.stringify(moreJson));
+                            callback(str);
+                        }
+                    });
+                }
             };
 
             fs.readFile(path, 'utf8', function (err, data) {
@@ -340,7 +396,7 @@ var web;
     });
 
     io.use(sharedsession(session, {
-        autoSave:true
+        autoSave: true
     }));
 
     io.on('connection', function (socket) {
@@ -508,7 +564,7 @@ var fb;
             });
         },
         updatePass: function (email, oldPass, newPass, callback) {
-            console.log(email,oldPass);
+            console.log(email, oldPass);
             client.auth().signInWithEmailAndPassword(email, oldPass).then(function (data) {
                 client.auth().currentUser.updatePassword(newPass).then(function (data) {
                     callback({success: true});
@@ -867,71 +923,71 @@ var test;
 })();
 
 /*
-for (var i = 0; i < 5; i++) {
-    recover.addResource('POSTER_' + lib.randomString(10),
-        'US-GA-Atlanta',
-        'TITLE_' + lib.randomString(5),
-        'CONTENT_' + lib.randomString(5),
-        Math.floor(Math.random() * 5));
-    recover.addRecoveryArea('POSTER_' + lib.randomString(10),
-        'US-GA-Atlanta',
-        'TITLE_' + lib.randomString(5),
-        'CONTENT_' + lib.randomString(5));
-}
-*/
+ for (var i = 0; i < 5; i++) {
+ recover.addResource('POSTER_' + lib.randomString(10),
+ 'US-GA-Atlanta',
+ 'TITLE_' + lib.randomString(5),
+ 'CONTENT_' + lib.randomString(5),
+ Math.floor(Math.random() * 5));
+ recover.addRecoveryArea('POSTER_' + lib.randomString(10),
+ 'US-GA-Atlanta',
+ 'TITLE_' + lib.randomString(5),
+ 'CONTENT_' + lib.randomString(5));
+ }
+ */
 /*
-for (var i = 0; i < 900; i++) {
-    fb.getUniqueKey(28, config.firebase.userPath, function (uid) {
-        fb.ref(config.firebase.userPath + uid).set({
-            email: 'boi@boi.boi',
-            firstName: 'boi',
-            lastName: 'boi',
-            helpRequest: 0,
-            phoneNumber: '123456790'
-        });
-    });
-}*/
+ for (var i = 0; i < 900; i++) {
+ fb.getUniqueKey(28, config.firebase.userPath, function (uid) {
+ fb.ref(config.firebase.userPath + uid).set({
+ email: 'boi@boi.boi',
+ firstName: 'boi',
+ lastName: 'boi',
+ helpRequest: 0,
+ phoneNumber: '123456790'
+ });
+ });
+ }*/
 
 
 /*
-fb.ref(config.firebase.userPath).once('value', function (snap) {
-    var users = snap.val();
-    var userIds = Object.keys(users);
-    for (var i = 0; i < userIds.length; i++) {
-        var latlng = randomLatLng();
-        recover.updateHelpRequest(userIds[i], latlng.latitude, latlng.longitude);
-    }
-});*/
+ fb.ref(config.firebase.userPath).once('value', function (snap) {
+ var users = snap.val();
+ var userIds = Object.keys(users);
+ for (var i = 0; i < userIds.length; i++) {
+ var latlng = randomLatLng();
+ recover.updateHelpRequest(userIds[i], latlng.latitude, latlng.longitude);
+ }
+ });*/
 /*
-fb.ref(config.firebase.resourcePath).once('value', function (snap) {
-    var arr = snap.val();
-    var ids = Object.keys(arr);
-    for (var i = 0; i < ids.length; i++) {
-        fb.ref(config.firebase.resourcePath + ids[i]).update(randomLatLng());
-    }
-});*/
+ fb.ref(config.firebase.resourcePath).once('value', function (snap) {
+ var arr = snap.val();
+ var ids = Object.keys(arr);
+ for (var i = 0; i < ids.length; i++) {
+ fb.ref(config.firebase.resourcePath + ids[i]).update(randomLatLng());
+ }
+ });*/
 
 //Update poster ids
 /*
-fb.ref(config.firebase.userPath).once('value', function (snap) {
-    var users = snap.val();
-    var userIds = Object.keys(users);
-    fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
-        var arr = snap.val();
-        var ids = Object.keys(arr);
-        for (var i = 0; i < ids.length; i++) {
-            fb.ref(config.firebase.recoveryPath + ids[i]).update({
-                poster: userIds[Math.floor(Math.random() * userIds.length)]
-            });
-        }
-    });
-});*/
+ fb.ref(config.firebase.userPath).once('value', function (snap) {
+ var users = snap.val();
+ var userIds = Object.keys(users);
+ fb.ref(config.firebase.recoveryPath).once('value', function (snap) {
+ var arr = snap.val();
+ var ids = Object.keys(arr);
+ for (var i = 0; i < ids.length; i++) {
+ fb.ref(config.firebase.recoveryPath + ids[i]).update({
+ poster: userIds[Math.floor(Math.random() * userIds.length)]
+ });
+ }
+ });
+ });*/
 
 /*
-fb.ref(config.firebase.userRecoveryAreaList + 'Rnod84WXCUM1WNOF91lMDhNaXc72').set({
-    'CgjYIMd662bwXCiy4jG4': true
-});
-*/
+ fb.ref(config.firebase.userRecoveryAreaList + 'Rnod84WXCUM1WNOF91lMDhNaXc72').set({
+ 'CgjYIMd662bwXCiy4jG4': true
+ });
+ */
 
 //Start web
 web.start();

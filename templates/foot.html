@@ -65,6 +65,9 @@
     }
 
     var inAuth = ['dashboard.html', 'profile.html', 'recoveryAreas.html'];
+    if (serverData.authenticated) {
+        inAuth.push('/checkinList.html');
+    }
     var areWeInAuth = false;
     for (var i = 0; i < inAuth.length; i++) {
         if (window.location.href.indexOf(inAuth[i]) >= 0) {

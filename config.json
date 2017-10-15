@@ -11,6 +11,7 @@
     "recoveryPath": "/RNRecoveryArea/",
     "locationPath": "/RNLocation/",
     "userResourceList": "/RNUserResourceList/",
-    "userRecoveryAreaList": "/RNUserRecoveryAreaList/"
+    "userRecoveryAreaList": "/RNUserRecoveryAreaList/",
+    "locationCheckIn": "/RNCheckIn/"
   }
 }

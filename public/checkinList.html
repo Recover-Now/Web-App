@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <title>Resources</title>
+    <link rel="stylesheet" type="text/css" href="css/checkinlist.css">
+    %HEAD%
+</head>
+<body>
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Main -->
+    <div id="main">
+        <div class="inner">
+
+            %HEADER%
+
+            <!-- Content -->
+            <section>
+                <header class="main">
+                    <h1>Recovery Area Check-In List</h1>
+                </header>
+
+                <div id="checkinList"></div>
+
+
+                <hr class="major" />
+
+            </section>
+
+        </div>
+    </div>
+
+    %SIDEBARDASH%
+
+</div>
+
+<script>
+    var serverData = '%SERVERDATA%';
+    if (serverData.toLowerCase() != '%serverdata%') {
+        serverData = JSON.parse(serverData);
+    } else {
+        serverData = {};
+    }
+</script>
+
+%FOOT%
+<script src="js/checkinlist.js"></script>
+</body>
+</html>
