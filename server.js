@@ -137,6 +137,8 @@ var web;
                 });
             };
 
+            templates['%SIDEBARAUTH%'] = !!uid ? templates['%SIDEBARDASH%']: templates['%SIDEBAR%'];
+
             var replace = {
                 '/dashboard.html': replaceUserInfo,
                 '/profile.html': replaceUserInfo,
